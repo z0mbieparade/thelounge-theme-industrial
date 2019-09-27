@@ -1,0 +1,32 @@
+{
+	"name": "thelounge-theme-industrial",
+	"version": "1.0.0",
+	"description": "A dark monospaced theme for thelounge",
+	"main": "package.json",
+	"license": "MIT",
+	"homepage": "https://github.com/z0mbieparade/thelounge-theme-industrial",
+	"thelounge": {
+		"name": "Industrial",
+		"type": "theme",
+		"css": "theme.css",
+		"themeColor": "#183516"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/z0mbieparade/thelounge-theme-industrial.git"
+	},
+	"bugs": {
+		"url": "https://github.com/z0mbieparade/thelounge-theme-industrial/issues"
+	},
+	"keywords": [
+		"thelounge",
+		"thelounge-theme"
+	],
+	"devDependencies": {
+		"stylelint": "^10.1.0",
+		"stylelint-config-standard": "^18.3.0"
+	},
+	"scripts": {
+		"test": "stylelint theme.css"
+	}
+}
