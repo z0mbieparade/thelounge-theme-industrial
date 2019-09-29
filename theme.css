@@ -98,6 +98,15 @@ button.btn, input.input, select.input
 	background-color: transparent;
 }
 
+#settings .error {
+	color: var(--color-red);
+}
+
+#settings #play, 
+#settings .extra-help {
+	color: var(--color-gray);
+}
+
 #windows .window h1 { color: var(--color-yellow) }
 #windows .window h2 { 
 	color: var(--color-orange);
