@@ -9,7 +9,7 @@
 		"name": "Industrial",
 		"type": "theme",
 		"css": "theme.css",
-		"themeColor": "#183516"
+		"themeColor": "#000000"
 	},
 	"repository": {
 		"type": "git",
@@ -21,12 +21,5 @@
 	"keywords": [
 		"thelounge",
 		"thelounge-theme"
-	],
-	"devDependencies": {
-		"stylelint": "^10.1.0",
-		"stylelint-config-standard": "^18.3.0"
-	},
-	"scripts": {
-		"test": "stylelint theme.css"
-	}
+	]
 }
