@@ -307,7 +307,8 @@ h1, h2, h3, h4,
 }
 
 #chat .content, #chat .from, #chat .time {
-	padding: 0;
+	padding-top: 0;
+	padding-bottom: 0;
 }
 
 #chat .unread-marker:before
