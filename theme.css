@@ -128,11 +128,11 @@ button.btn, input.input, select.input
 	font-weight: bold;
 }
 
-#windows #chat .header {
+.window #chat .header {
 	background-color: var(--color-navy);
 	border: none;
 }
-#windows .header .topic {
+.window .header .topic {
 	color: var(--color-white);
 }
 
@@ -140,14 +140,12 @@ button.btn, input.input, select.input
 	height: 500px;
 }
 
-.scroll-down:hover .scroll-down-arrow
-{
+.scroll-down:hover .scroll-down-arrow {
 	background-color: var(--color-lime);
 }
 
 #sidebar,
-#chat .chat
-{
+#chat .chat {
 	border-right: 1px solid var(--color-purple);
 }
 
@@ -170,8 +168,7 @@ button.btn, input.input, select.input
 h1, h2, h3, h4,
 #sidebar .chan .lobby-wrap .name,
 #form #nick,
-#chat .user-mode:before
-{
+#chat .user-mode:before {
 	text-transform: lowercase;
 	font-family: 'Major Mono Display', monospace;
 	font-weight: bold;
@@ -191,15 +188,37 @@ h1, h2, h3, h4,
 }
 
 #footer button:hover, 
-#sidebar .chan:hover
-{
+#sidebar .chan:hover {
 	background-color: transparent;
 	color: var(--color-lime);
 }
 
+#sidebar .channel-list-item {
+	padding: 1px 14px;	
+}
+
+#sidebar .channel-list-item .name {
+	line-height: 18px;
+	margin-top: 2px;
+}
+
+#sidebar .channel-list-item .not-connected-tooltip, 
+#sidebar .channel-list-item .not-secure-tooltip, 
+#sidebar .channel-list-item .parted-channel-tooltip {
+	display: inline-block;
+	margin-top: 3px;
+}
+
+#sidebar .channel-list-item[data-type=lobby] .add-channel {
+	line-height: 26px;
+}
+
+#sidebar .network .collapse-network-icon {
+	line-height: 24px;
+}
+
 #sidebar .active, 
-#sidebar .active:hover
-{
+#sidebar .active:hover {
 	background-color: var(--color-navy);
 }
 
@@ -207,15 +226,14 @@ h1, h2, h3, h4,
     margin-bottom: 0px;
 }
 
-#chat .msg.motd .text,
+#chat .msg[data-type=motd] .text,
 #chat .toggle-content {
 	background-color: var(--background-light-color);
 }
 
-#chat .msg.motd .text > span
-{
+#chat .msg[data-type=motd] .text > span {
 	line-height: 13px;
-    font-size: 17px;
+    	font-size: 17px;
 }
 
 #chat .count::before,
@@ -246,8 +264,7 @@ h1, h2, h3, h4,
 
 #form #nick:after { content: ']'; }
 #form #nick:before { content: '['; }
-#form #nick 
-{
+#form #nick {
 	display: block;
 	color: var(--color-lime);
 	font-weight: bold;
@@ -266,39 +283,35 @@ h1, h2, h3, h4,
 	border-bottom-color: transparent;
 }
 
-#chat table.ban-list td
-{
+#chat table.ban-list td {
 	color: var(--color-red);
 }
 
 #chat .chan .notice .user, 
 #chat .notice .content, 
-#chat .notice .time
-{
+#chat .notice .time {
 	color: var(--color-teal) !important;
 }
 
 #chat .action .content, 
 #chat .action .from, 
-#chat .action .user
-{
+#chat .action .user {
 	color: var(--color-orange);
 	font-style: italic;
 }
 
-#chat .channel .msg.highlight
-{
+#chat .chat-view[data-type=channel] .msg.highlight {
 	background-color: transparent;
 	border-left: 5px solid transparent;
 }
-#chat .channel .msg.highlight .from .user
+
+#chat .chat-view[data-type=channel] .msg.highlight .from .user
 {
 	background-color: var(--color-purple);
 	color: var(--color-yellow) !important;
 	font-weight: bold;
 }
-#chat .channel .msg.highlight .content
-{
+#chat .chat-view[data-type=channel] .msg.highlight .content {
 	border-left: 1px solid var(--color-yellow);
 }
 
