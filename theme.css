@@ -290,6 +290,10 @@ h1, h2, h3, h4,
 #form {
 	border: none;
 	border-top: 1px solid var(--color-purple);
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: start;
 }
 
 #form #nick:after { content: ']'; }
@@ -298,12 +302,23 @@ h1, h2, h3, h4,
 	display: block;
 	color: var(--color-lime);
 	font-weight: bold;
+	flex: 0 0 auto;
 }
 
 #chat .userlist .search,
 #form #input {
 	border: 0;
 	color: var(--body-color);
+}
+
+#form #input {
+	flex: 1 1 auto;
+}
+
+#form #upload-tooltop,
+#form #submit-tooltop
+{
+	flex: 0 0 auto;
 }
 
 #chat table.channel-list th,
