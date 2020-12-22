@@ -208,13 +208,13 @@ h1, h2, h3, h4,
 }
 
 #chat .msg.motd .text,
-#chat .msg[data-type="monospace_block"] .text,
+#chat .msg[data-type="monospace_block"][data-command="motd"] .text,
 #chat .toggle-content {
 	background-color: var(--background-light-color);
 }
 
 #chat .msg.motd .text > span,
-#chat .msg[data-type="monospace_block"] .text,
+#chat .msg[data-type="monospace_block"][data-command="motd"] .text > span,
 {
 	line-height: 13px;
     font-size: 17px;
