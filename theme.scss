@@ -22,14 +22,7 @@
 	font-weight: bold;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Major+Mono+Display&display=swap');
-
-@font-face {
-	font-family: 'Menlo Regular', monospace;
-	font-style: normal;
-	font-weight: normal;
-	src: local('Menlo Regular'), url('Menlo-Regular.woff') format('woff');
-}
+@import url('https://fonts.googleapis.com/css?family=Major+Mono+Display&display=swap');
 
 :root {
 	--color-white: white;
@@ -98,7 +91,7 @@ html {
 }
 
 * {
-	font-family: 'Menlo Regular', 'IBM Plex Mono', 'Courier', monospace !important;
+	font-family: monospace, monospace !important;
 	font-size: 13px;
 }
 
