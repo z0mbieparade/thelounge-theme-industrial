@@ -5,6 +5,13 @@
  * License: MIT
  */
 @import url("https://fonts.googleapis.com/css?family=Major+Mono+Display&display=swap");
+@font-face {
+  font-family: 'Menlo Regular', monospace;
+  font-style: normal;
+  font-weight: normal;
+  src: local("Menlo Regular"), url("Menlo-Regular.woff") format("woff");
+}
+
 :root {
   --color-white: white;
   --color-black: black;
@@ -69,13 +76,13 @@ html {
 }
 
 * {
-  font-family: 'Courier', monospace;
+  font-family: 'Menlo Regular', 'Courier', monospace !important;
   font-size: 13px;
 }
 
 h1, h2, h3, h4 {
   text-transform: lowercase;
-  font-family: 'Major Mono Display', monospace;
+  font-family: 'Major Mono Display', monospace !important;
   font-weight: bold;
 }
 
@@ -225,7 +232,7 @@ code {
 #sidebar .jump-to-results .channel-list-item .lobby-wrap .name,
 #sidebar .channel-list-item .lobby-wrap .name {
   text-transform: lowercase;
-  font-family: 'Major Mono Display', monospace;
+  font-family: 'Major Mono Display', monospace !important;
   font-weight: bold;
 }
 
@@ -300,7 +307,7 @@ code {
   flex: 0 0 auto;
   background-color: inherit;
   text-transform: lowercase;
-  font-family: 'Major Mono Display', monospace;
+  font-family: 'Major Mono Display', monospace !important;
   font-weight: bold;
 }
 
@@ -454,7 +461,7 @@ code {
   background-color: transparent;
   padding-bottom: 0;
   text-transform: lowercase;
-  font-family: 'Major Mono Display', monospace;
+  font-family: 'Major Mono Display', monospace !important;
   font-weight: bold;
 }
 

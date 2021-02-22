@@ -18,11 +18,18 @@
 @mixin lower_mono()
 {
 	text-transform: lowercase;
-	font-family: 'Major Mono Display', monospace;
+	font-family: 'Major Mono Display', monospace !important;
 	font-weight: bold;
 }
 
 @import url('https://fonts.googleapis.com/css?family=Major+Mono+Display&display=swap');
+
+@font-face {
+	font-family: 'Menlo Regular', monospace;
+	font-style: normal;
+	font-weight: normal;
+	src: local('Menlo Regular'), url('Menlo-Regular.woff') format('woff');
+}
 
 :root {
 	--color-white: white;
@@ -91,7 +98,7 @@ html {
 }
 
 * {
-	font-family: 'Courier', monospace;
+	font-family: 'Menlo Regular', 'Courier', monospace !important;
 	font-size: 13px;
 }
 
