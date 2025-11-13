@@ -1,20 +1,305 @@
+@use "sass:string";
+@use "sass:map";
+@use "sass:math";
+@use "sass:list";
+
 /*!
  * Industrial
  *
- * URL: https://github.com/z0mbieparade/thelounge-theme-industrial
+ * URL: https://git.z0m.bi/z0mbi/thelounge-theme-industrial
  * License: MIT
  */
 
-//because sass is fucking stupid and doesn't like hsl
-@function h($h:0, $s:0, $l:0, $a:false){
-	@if $a {
-		@return unquote('hsla(#{$h}, #{$s}, #{$l}, #{$a})');
-	}
-	@else {
-		@return unquote('hsl(#{$h}, #{$s}, #{$l})');
-	}
+$irc: ( 0: 'white', 1: 'black', 2: 'navy', 3: 'green', 4: 'red', 5: 'brown', 6: 'purple',
+	7: 'orange', 8: 'yellow', 9: 'lime', 10: 'teal', 11: 'cyan', 12: 'blue', 13: 'fuchsia',
+	14: 'gray', 15: 'lightgray'
+);
+
+$chars: (
+	'a':'A','b':'B','c':'C','d':'D','e':'E','f':'F','g':'G','h':'H','i':'I','j':'J',
+	'k':'K','l':'L','m':'M','n':'N','o':'O','p':'P','q':'Q','r':'R','s':'S','t':'T',
+	'u':'U','v':'V','w':'W','x':'X','y':'Y','z':'Z'
+);
+
+$perceptual-hue-map: (
+	0,    // Red
+	15,   // Red-orange
+	35,   // Orange  
+	44,   // Yellow-orange
+	60,   // Yellow
+	75,   // Yellow-green
+	120,  // Green
+	180,  // Cyan
+	206,  // Blue-cyan
+	240,  // Blue
+	270,  // Blue-violet
+	300,  // Magenta
+	320,  // Red-magenta
+	360   // Red (full circle)
+);
+
+$base-hue-lightness: (
+	0: 55%,   // Red
+	15: 50%,  // Red-orange
+	35: 50%,  // Orange  
+	44: 50%,  // Yellow-orange
+	60: 40%,  // Yellow
+	75: 45%,  // Yellow-green
+	120: 45%, // Green
+	180: 45%, // Cyan
+	206: 55%, // Blue-cyan
+	240: 75%, // Blue
+	270: 65%, // Blue-violet
+	300: 50%, // Magenta
+	320: 55%, // Red-magenta
+	360: 55%  // Red (full circle)
+);
+
+$lighter: 15; //makes the darkest color lighter
+$darker: 0; //makes the lightest color darker
+
+// Function to interpolate between two values
+// $start: starting value
+// $end: ending value
+// $factor: interpolation factor (0 to 1), greater number = closer to $end
+@function lerp($start, $end, $factor) {
+	@return $start + ($end - $start) * $factor;
 }
 
+// Function to sort a map by its values (ascending order)
+// Returns a list of keys sorted by their corresponding values
+// $map: the map to sort
+@function sort-map-by-value($map) {
+	$sorted-keys: ();
+	$map-size: list.length(map.keys($map));
+
+	// Selection sort: find minimum value in each pass
+	@for $pass from 1 through $map-size {
+		$min-value: 999999;
+		$min-key: null;
+
+		@each $key, $value in $map {
+			// Skip keys already in sorted list
+			$already-used: false;
+			@each $used-key in $sorted-keys {
+				@if $used-key == $key {
+					$already-used: true;
+				}
+			}
+
+			// Find the minimum value among remaining keys
+			@if not $already-used and $value < $min-value {
+				$min-value: $value;
+				$min-key: $key;
+			}
+		}
+
+		// Add the minimum key to sorted list
+		@if $min-key != null {
+			$sorted-keys: append($sorted-keys, $min-key);
+		}
+	}
+
+	@return $sorted-keys;
+}
+
+// Fixed permutation map for shuffling (deterministic, not random)
+// This creates a consistent shuffle that remains the same across renders
+// Index 8 and 26 (letter Z) remain in place
+$shuffle-map: (
+	1: 17, 2: 5, 3: 23, 4: 11, 5: 29, 6: 3, 7: 19, 9: 31, 10: 14,
+	11: 27, 12: 2, 13: 20, 14: 9, 15: 25, 16: 13, 17: 6, 18: 22, 19: 15, 20: 30,
+	21: 21, 22: 10, 23: 18, 24: 28, 25: 1, 26: 4, 27: 16, 28: 7, 29: 24, 30: 12,
+	31: 32, 32: 26,
+
+	8: 8
+);
+$shuffle-letters: (
+	'A': 'Q', 'B': 'W', 'C': 'T', 'D': 'R', 'F': 'Y', 'G': 'U', 'H': 'I',
+	'I': 'O', 'J': 'P', 'K': 'M', 'L': 'S', 'M': 'K', 'N': 'F', 'O': 'G', 'P': 'H',
+	'Q': 'J', 'R': 'D', 'S': 'L', 'T': 'A', 'U': 'X', 'V': 'C', 'W': 'V', 'X': 'B',
+	'Y': 'N',
+
+	'E': 'E', 'Z': 'Z', 
+);
+
+// Function to shuffle an index using the fixed permutation map
+// $index: the original index (1-32)
+// Returns: the shuffled index
+@function shuffle-index($index) {
+	//if there's no mapping, return the original index
+	@if not map.has-key($shuffle-map, $index) {
+		@return $index;
+	}
+	@return map.get($shuffle-map, $index);
+}
+
+// Function to get perceptually uniform hue
+@function perceptual-hue($position) {
+	// Clamp position between 0 and 1
+	$pos: math.max(0, math.min(1, $position));
+
+	// Calculate which segment we're in
+	$map-length: list.length($perceptual-hue-map);
+	$segment-size: math.div(1, ($map-length - 1));
+	$segment-index: math.floor(math.div($pos, $segment-size));
+
+	// Handle edge case for position = 1
+	@if $segment-index >= $map-length - 1 {
+		@return list.nth($perceptual-hue-map, $map-length);
+	}
+
+	// Get the two hues to interpolate between
+	$lower-hue: list.nth($perceptual-hue-map, $segment-index + 1);
+	$upper-hue: list.nth($perceptual-hue-map, $segment-index + 2);
+
+	// Calculate interpolation factor within this segment
+	$segment-start: $segment-index * $segment-size;
+	$factor: math.div(($pos - $segment-start), $segment-size);
+
+	// Interpolate between the two hues
+	@return lerp($lower-hue, $upper-hue, $factor);
+}
+
+// Function to get base lightness for a given hue
+@function get-hue-lightness($hue) {
+  // Convert hue to 0-360 range
+  $normalized-hue: $hue % 360;
+  @if $normalized-hue < 0 {
+    $normalized-hue: $normalized-hue + 360;
+  }
+  
+  // Find the closest hue values in our lightness map
+  $lower-hue: 0;
+  $upper-hue: 360;
+  $lower-lightness: map.get($base-hue-lightness, 0);
+  $upper-lightness: map.get($base-hue-lightness, 360);
+  
+  // Find the surrounding hue values
+  @each $hue-key, $lightness-value in $base-hue-lightness {
+    @if $hue-key <= $normalized-hue {
+      $lower-hue: $hue-key;
+      $lower-lightness: $lightness-value;
+    }
+    @if $hue-key >= $normalized-hue and $upper-hue == 360 {
+      $upper-hue: $hue-key;
+      $upper-lightness: $lightness-value;
+    }
+  }
+  
+  // Handle edge case where we found exact match
+  @if $lower-hue == $upper-hue {
+    @return $lower-lightness;
+  }
+  
+  // Interpolate between the lightness values
+  $factor: math.div(($normalized-hue - $lower-hue), ($upper-hue - $lower-hue));
+  $interpolated-lightness: lerp(math.div($lower-lightness, 1%), math.div($upper-lightness, 1%), $factor);
+  
+  @return $interpolated-lightness * 1%;
+}
+
+// Generates a color based on index, optional alpha, and fractional interpolation
+// $num: current color index (0 to max)
+// $max: total number of distinct colors (default is 31)
+// $between: Number of fractional steps between adjacent colors (default is 0 - no interpolation)
+// $between-max: Maximum number of fractional steps (default is 27 - for letters a-z)
+// $a: alpha value (0-1) for transparency (default is 1 - fully opaque)
+@function c($num: 0, $max-num: 31, $between: 0, $max-between: 27, $a: 1, $return-data:false) {
+	
+	$num: $num % ($max-num + 1);
+	@if $num < 0 {
+		$num: $num + ($max-num + 1);
+	}
+	$between: $between % ($max-between + 1);
+	@if $between < 0 {
+		$between: $between + ($max-between + 1);
+	}
+
+	// Divide by ($max-num + 1) to ensure position never reaches 1.0
+	// This prevents wraparound where position 1.0 = position 0.0 (both red)
+	$position: math.div($num, $max-num + 1);
+	$h: perceptual-hue($position); // Perceptual hue based on position
+	$s: 100; // Full saturation by default (unitless)
+	$l: get-hue-lightness($h); // Get base lightness for this hue (unitless)
+
+	@if $num % 2 != 0 {
+		$l: $l + $lighter; // lighten odd numbers
+	} @else {
+		$l: $l - $darker; // darken even numbers
+	}
+
+	// If between interpolation is requested
+	@if ($between > 0 and $max-between > 0) {
+		// Convert between value to decimal (0-1 range)
+		$dec: math.div($between, $max-between);
+
+		// Calculate the next color's values
+		$next-num: ($num + 1) % $max-num; // Wrap around if needed
+
+		$next-color-data: c($num + 1, $max-num, 0, $max-between, $a, true);
+		$next-num: map.get($next-color-data, 'num');
+		$h-next: map.get($next-color-data, 'h');
+		$l-next: map.get($next-color-data, 'l');
+
+		// Apply the same odd/even lightness adjustment to the next color
+		@if $next-num % 2 != 0 {
+			$l-next: $l-next + $lighter;
+		} @else {
+			$l-next: $l-next - $darker;
+		}
+
+		// Calculate the distance between current and next color values
+		// Handle hue wrapping (e.g., from 320 to 0)
+		$h-dist: $h-next - $h;
+		@if $h-dist > 180 {
+			$h-dist: $h-dist - 360;
+		} @else if $h-dist < -180 {
+			$h-dist: $h-dist + 360;
+		}
+
+		$l-dist: $l-next - $l; // Lightness distance
+
+		// Calculate how much to shift current values toward next color
+		$h-frac: $h-dist * $dec; // Fractional hue shift
+		$l-frac: $l-dist * $dec; // Fractional lightness shift
+
+		// Adjust saturation based on letter position for even more color variety
+		@if $between % 3 == 0 {
+			$s: 70%; // Every 3rd letter: low saturation (more muted)
+		} @else if $between % 2 == 0 {
+			$s: 90%; // Every 2nd letter: medium saturation
+		}
+		// Otherwise keep 100% saturation (full vibrant color)
+
+		// Apply the fractional interpolation to hue and lightness
+		$h: $h + $h-frac;
+		$l: $l + $l-frac;
+	}
+
+	// round to 2 decimal places to avoid precision issues
+	$h: math.div(math.round($h * 100), 100);
+	$l: math.div(math.round($l * 100), 100);
+	$s: math.div(math.round($s * 100), 100);
+	$a: math.div(math.round($a * 100), 100);
+
+	@if $return-data {
+		@return (
+			'num': $num,
+			'h': $h,
+			's': $s,
+			'l': $l,
+			'a': $a,
+			'hsla': hsla($h, $s * 1%, $l, $a)
+		);
+	}
+
+	@return hsla($h, $s * 1%, $l, $a);
+}
+
+// Applies consistent text styling for the theme's distinctive typography
+// Converts text to lowercase, applies 'Major Mono Display' monospace font, and makes it bold
+// Used primarily for headings and network/lobby names to maintain theme aesthetic
 @mixin lower_mono()
 {
 	text-transform: lowercase;
@@ -24,7 +309,44 @@
 
 @import url('https://fonts.googleapis.com/css?family=Major+Mono+Display&display=swap');
 
+$letter-colors: ();
+$color-colors: ();
+
 :root {
+	$letter: 0;
+	@each $lower, $upper in $chars {
+		$shuffled-upper: map.get($shuffle-letters, $upper);
+		$letter-color: c($letter + 14, list.length($chars) - 1, 0, 0, 1, true);
+		$letter-colors: map.merge($letter-colors, ($shuffled-upper: $letter-color)) !global;
+		--color-#{$upper}: #{map.get($letter-color, 'hsla')};
+		$letter: $letter + 1;
+	}
+
+	@for $i from 1 through 32 {
+		$shuffled-i: shuffle-index($i);
+		$color-color: c($i + 6, 31, 0, 0, 1, true);
+		$color-colors: map.merge($color-colors, ($shuffled-i: $color-color)) !global;
+		--color-#{$i}: #{map.get($color-color, 'hsla')};
+	}
+
+	$letter: 0;
+	@each $lower, $upper in $chars {
+		$letter-color: map.get($letter-colors, $upper);
+		$h-letter: map.get($letter-color, 'h');
+		@for $i from 1 through 32 {
+			$color-color: map.get($color-colors, $i);
+			$h-color: map.get($color-color, 'h');
+
+			$h: lerp($h-letter, $h-color, 0.2);
+			$s: map.get($letter-color, 's');
+			$l: map.get($letter-color, 'l');
+			$a: map.get($letter-color, 'a');
+
+			--color-#{$i}#{$upper}: #{hsla($h, $s * 1%, $l, $a)};
+		}
+		$letter: $letter + 1;
+	}
+
 	--color-white: white;
 	--color-black: black;
 	--color-navy: navy;
@@ -54,6 +376,9 @@
 	--background-light-color: var(--color-black);
 	--button-color: var(--color-lime);
 	--button-text-color-hover: var(--color-black);
+	--overlay-bg-color: var(--color-black);
+	--window-heading-color: var(--color-gray);
+	--upload-progressbar-color: var(--button-color);
 }
 
 ::-webkit-scrollbar {
@@ -95,6 +420,71 @@ html {
 	font-size: 13px;
 }
 
+#viewport .lt::before,
+#viewport .rt::before,
+#chat button.mentions::before,
+#chat button.close::before,
+#chat button.menu::before,
+#chat button.search::before,
+.channel-list-item::before,
+#footer .icon,
+#chat .count::before,
+#connect .extra-help,
+#settings .extra-help,
+#settings #play::before,
+#settings .settings-menu .icon::before,
+#form #upload::before,
+#form #submit::before,
+#chat .msg[data-type="away"] .from::before,
+#chat .msg[data-type="back"] .from::before,
+#chat .msg[data-type="invite"] .from::before,
+#chat .msg[data-type="join"] .from::before,
+#chat .msg[data-type="kick"] .from::before,
+#chat .msg[data-type="login"] .from::before,
+#chat .msg[data-type="logout"] .from::before,
+#chat .msg[data-type="part"] .from::before,
+#chat .msg[data-type="quit"] .from::before,
+#chat .msg[data-type="topic"] .from::before,
+#chat .msg[data-type="mode_channel"] .from::before,
+#chat .msg[data-type="mode_user"] .from::before,
+#chat .msg[data-type="mode"] .from::before,
+#chat .msg[data-command="motd"] .from::before,
+#chat .msg[data-command="help"] .from::before,
+#chat .msg[data-command="info"] .from::before,
+#chat .msg[data-type="ctcp"] .from::before,
+#chat .msg[data-type="ctcp_request"] .from::before,
+#chat .msg[data-type="whois"] .from::before,
+#chat .msg[data-type="nick"] .from::before,
+#chat .msg[data-type="action"] .from::before,
+#chat .msg[data-type="plugin"] .from::before,
+#chat .msg[data-type="raw"] .from::before,
+#chat .msg-statusmsg span::before,
+#chat .msg-shown-in-active span::before,
+#chat .toggle-button::after,
+#chat .toggle-content .more-caret::before,
+#chat .scroll-down-arrow::after,
+#chat .topic-container .save-topic span::before,
+#version-checker::before,
+.context-menu-item::before,
+#help .website-link::before,
+#help .documentation-link::before,
+#help .report-issue-link::before,
+#image-viewer .previous-image-btn::before,
+#image-viewer .next-image-btn::before,
+#image-viewer .open-btn::before,
+.channel-list-item .not-secure-icon::before,
+.channel-list-item .not-connected-icon::before,
+.channel-list-item .parted-channel-icon::before,
+.jump-to-input::before,
+.password-container .reveal-password span,
+#sidebar .collapse-network-icon::before {
+	//font: normal normal normal 13px/1 FontAwesome !important;
+	font-family: FontAwesome !important;
+	font-size: inherit; /* Can't have font-size inherit on line above, so need to override */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 h1, h2, h3, h4
 {
 	@include lower_mono();
@@ -107,19 +497,16 @@ h1, h2, h3, h4
 	border: 1px solid var(--color-purple);
 
 	.textcomplete-item,
-	.context-menu-item
-	{
+	.context-menu-item {
 		color: var(--color-white);
 
-		a
-		{
+		a {
 			color: var(--color-white);
 		}
 
 		&:hover,
 		&:focus,
-		.active
-		{
+		.active {
 			background-color: var(--color-navy);
 		}
 	}
@@ -160,8 +547,7 @@ select.input option {
 #viewport
 {
 	.lt,
-	.rt
-	{
+	.rt {
 	 color: var(--body-color-muted);
 	}
 }
@@ -181,8 +567,7 @@ select.input option {
 #version-checker
 {
 	&.new-packages,
-	&.new-version
-	{
+	&.new-version {
 		color: var(--color-black);
 		background-color: var(--color-yellow);
 	}
@@ -214,16 +599,14 @@ code
 		.network {
 			margin-bottom: 10px;
 
-			.collapse-network-icon
-			{
+			.collapse-network-icon {
 				line-height: 24px;
 			}
 		}
 	}
 
 	.jump-to-results .channel-list-item,
-	.channel-list-item
-	{
+	.channel-list-item {
 		padding: 1px 10px;
 		color: var(--color-white);
 
@@ -244,8 +627,7 @@ code
 			margin-top: 2px;
 		}
 
-		.lobby-wrap .name
-		{
+		.lobby-wrap .name {
 			@include lower_mono();
 		}
 
@@ -255,8 +637,7 @@ code
 			font-weight: bold;
 			padding-top: 6px;
 
-			&.highlight
-			{
+			&.highlight {
 				border: 1px solid var(--color-yellow);
 				padding: 5px 5px 3px;
 			}
@@ -272,28 +653,24 @@ code
 			color: var(--color-red)
 		}
 
-		&[data-type=lobby]
-		{
+		&[data-type=lobby] {
 			padding: 1px 10px;
 			color: var(--color-lime);
 			line-height: 20px;
 
-			.add-channel
-			{
+			.add-channel {
 				line-height: 26px;
 			}
 
 			&.not-secure,
 			&.not-secure.active,
-			&.not-secure .lobby-wrap:hover
-			{
+			&.not-secure .lobby-wrap:hover {
 				color: var(--color-orange)
 			}
 
 			&.not-connected,
 			&.not-connected.active,
-			&.not-connected .lobby-wrap:hover,
-			{
+			&.not-connected .lobby-wrap:hover, {
 				color: var(--color-red)
 			}
 		}
@@ -328,38 +705,32 @@ code
 		flex: 1 1 auto;
 	}
 
-	.input
-	{
+	.input {
 		background-color: inherit;
 	}
 
 	#upload-tooltop,
-	#submit-tooltop
-	{
+	#submit-tooltop {
 		flex: 0 0 auto;
 	}
 
 	#submit,
-	#upload
-	{
+	#upload {
 		color: var(--body-color-muted);
 	}
 }
 
-#chat
-{
+#chat {
 	.chat {
 		border-right: 1px solid var(--color-purple);
 	}
 
 	.count::before,
-	button.menu
-	{
+	button.menu {
 		color: var(--body-color-muted);
 	}
 
-	.self .content
-	{
+	.self .content {
 		color: var(--color-lightgray);
 	}
 
@@ -373,83 +744,65 @@ code
 		}
 	}
 
-	.toggle-content
-	{
+	.toggle-content {
 		background-color: var(--background-light-color);
 	}
 
 	.msg[data-command=motd],
-	.msg[data-type=motd]
-	{
-		.text
-		{
+	.msg[data-type=motd] {
+		.text {
 			background-color: var(--background-light-color);
+			line-height: 1rem;
 
-			> span
-			{
-				line-height: 17px;
-				font-size: 14px;
+			> span {
+				font-size: 1rem;
 				display: inline-block;
 			}
 		}
 	}
 
 	table.channel-list,
-	table.ban-list
-	{
-		th, td
-		{
+	table.ban-list {
+		th,
+		td {
 			border-bottom-color: transparent;
 		}
 	}
 
-	table.ban-list td
-	{
+	table.ban-list td {
 		color: var(--color-red);
 	}
 
-	.notice
-	{
-		.content,
-		.time
-		{
+	.notice {
+		.content, .time {
 			color: var(--color-teal) !important;
 		}
 	}
 
-	.action
-	{
-		.content,
-		.from,
-		.user
-		{
+	.action {
+		.content, .from, .user {
 			color: var(--color-orange);
 			font-style: italic;
 		}
 	}
 
-	.chat-view[data-type=channel]
-	{
-		.msg.highlight
-		{
+	.chat-view[data-type=channel] {
+		.msg.highlight {
 			background-color: transparent;
 			border-left: 5px solid transparent;
 
-			.from .user
-			{
+			.from .user {
 				background-color: var(--color-purple);
 				color: var(--color-yellow) !important;
 				font-weight: bold;
 			}
 
-			.content
-			{
+			.content {
 				border-left: 1px solid var(--color-yellow);
 			}
 		}
 
-		.notice .user
-		{
+		.notice .user {
 			color: var(--color-teal) !important;
 		}
 	}
@@ -463,49 +816,46 @@ code
 		padding-bottom: 0;
 	}
 
-	.unread-marker:before
-	{
+	.unread-marker:before {
 		border: 1px dashed var(--unread-marker-color)
 	}
 
-	.userlist
-	{
+	.userlist {
 		border: none;
 
-		.user.active
-		{
+		.user.active {
 			background-color: var(--color-navy);
 		}
 
-		.search
-		{
+		.search {
 			border: 0;
 			color: var(--body-color);
 		}
 
-		.count
-		{
+		.count {
 			background-color: inherit;
 		}
 	}
 
-	.user-mode
-	{
-    margin-bottom: 0px;
+	.user-mode {
+   		margin-bottom: 0px;
 		padding-bottom: 3px;
-		background-color: rgba(255,255,255,.15);
-		border: 1px solid rgba(255,220,255,.35);
+		background-color: rgba(255,255,255,.07);
+		border: 1px solid rgba(255,255,255,.35);
 
 		&:before {
-			color: rgba(255,255,255,1);
+			color: rgba(255,255,255,.7);
 			background-color: transparent;
 			padding-bottom: 0;
 			@include lower_mono();
 		}
 
-		.user
-		{
-			color: var(--color-white) !important;
+		.user {
+			//color: var(--color-white) !important;
+
+			&:after {
+				padding: 0 16px 0 24px;
+			}
 
 			&.active {
 				background-color: transparent;
@@ -514,7 +864,7 @@ code
 		}
 
 		&.owner {
-			background-color: rgba(0,220,255,.15);
+			background-color: rgba(0,220,255,.1);
 			border: 1px solid rgba(0,220,255,.35);
 
 			&:before {
@@ -523,7 +873,7 @@ code
 		}
 
 		&.admin {
-			background-color: rgba(0,255,0,.15);
+			background-color: rgba(0,255,0,.1);
 			border: 1px solid rgba(0,255,0,.35);
 
 			&:before {
@@ -532,7 +882,7 @@ code
 		}
 
 		&.op {
-			background-color: rgba(253,187,0,.15);
+			background-color: rgba(253,187,0,.1);
 			border: 1px solid rgba(253,187,0,.35);
 
 			&:before {
@@ -541,7 +891,7 @@ code
 		}
 
 		&.half-op {
-			background-color: rgba(253,70,0,.15);
+			background-color: rgba(253,70,0,.1);
 			border: 1px solid rgba(253,70,0,.35);
 
 			&:before {
@@ -550,7 +900,7 @@ code
 		}
 
 		&.voice {
-			background-color: rgba(195,0,253,.15);
+			background-color: rgba(195,0,253,.1);
 			border: 1px solid rgba(195,0,253,.35);
 
 			&:before {
@@ -562,79 +912,122 @@ code
 
 #footer
 {
-	button:hover
+	button
 	{
-		background-color: transparent;
-		color: var(--color-lime);
+		&:hover {
+			background-color: transparent;
+			color: var(--color-lime);
+		}
+
+		&.active {
+			background-color: var(--color-navy);
+		}
 	}
 }
 
-.irc-bg0 { background: var(--color-white) }
-.irc-bg1 { background: var(--color-black) }
-.irc-bg2 { background: var(--color-navy) }
-.irc-bg3 { background: var(--color-green) }
-.irc-bg4 { background: var(--color-red) }
-.irc-bg5 { background: var(--color-brown) }
-.irc-bg6 { background: var(--color-purple) }
-.irc-bg7 { background: var(--color-orange) }
-.irc-bg8 { background: var(--color-yellow) }
-.irc-bg9 { background: var(--color-lime) }
-.irc-bg10 { background: var(--color-teal) }
-.irc-bg11 { background: var(--color-cyan) }
-.irc-bg12 { background: var(--color-blue) }
-.irc-bg13 { background: var(--color-fuchsia) }
-.irc-bg14 { background: var(--color-gray) }
-.irc-bg15 { background: var(--color-lightgray) }
+@each $i, $color in $irc {
+	.irc-bg#{$i} { background: var(--color-#{$color}); }
+	.irc-fg#{$i} { color: var(--color-#{$color}); }
+}
 
-.irc-fg0 { color: var(--color-white) }
-.irc-fg1 { color: var(--color-black) }
-.irc-fg2 { color: var(--color-navy) }
-.irc-fg3 { color: var(--color-green) }
-.irc-fg4 { color: var(--color-red) }
-.irc-fg5 { color: var(--color-brown) }
-.irc-fg6 { color: var(--color-purple) }
-.irc-fg7 { color: var(--color-orange) }
-.irc-fg8 { color: var(--color-yellow) }
-.irc-fg9 { color: var(--color-lime) }
-.irc-fg10 { color: var(--color-teal) }
-.irc-fg11 { color: var(--color-cyan) }
-.irc-fg12 { color: var(--color-blue) }
-.irc-fg13 { color: var(--color-fuchsia) }
-.irc-fg14 { color: var(--color-gray) }
-.irc-fg15 { color: var(--color-lightgray) }
+// Controls nickname styling based on brightness/darkness of assigned color
+// Parameters:
+//   $dark: Whether to use bold font weight (for darker colors) or normal (for lighter colors)
+//   $color: Color index (not currently used in implementation)
+//   $upper: Whether the nickname starts with uppercase (not currently used in implementation)
+// Applies bold styling for dark colors to improve readability, hides :after pseudo-element for light colors
+@mixin dark_nick($dark:true, $color:1, $upper:false) {
+	@if $dark {
+		// For darker colors: use bold text to make it stand out and improve readability
+		font-weight: bold;
+	} @else {
+		// For lighter/brighter colors: use normal weight
+		font-weight: normal;
+		// Hide the :after pseudo-element for lighter colors (no visual indicator needed)
+		&:after {
+			display: none;
+		}
+	}
+}
+
+// Determines nickname text styling based on color index and first letter position
+// Parameters:
+//   $color: Color index (1-32) determining the base nickname color
+//   $letter: Alphabetical position (0-25) of nickname's first letter
+//   $upper: Whether the first letter is uppercase
+// Logic: For even-indexed colors, first 6 letters (a-f) are bold; for odd-indexed colors, last 6 letters (u-z) are bold
+// This creates visual variety in nickname styling based on their assigned color and first character
+@mixin extra_color($color:1, $letter:0, $upper:false)
+{
+	// Check if color index is even
+	@if $color % 2 == 0 {
+		// For even colors: make letters a-f (positions 0-5) bold
+		@if($letter < 6) {
+			@include dark_nick(true, $color, $upper); // Bold styling
+		} @else {
+			@include dark_nick(false); // Normal weight for g-z
+		}
+	} @else {
+		// For odd colors: make letters u-z (positions 21-25) bold
+		@if ($letter > 20) {
+			@include dark_nick(true, $color, $upper); // Bold styling
+		} @else {
+			@include dark_nick(false); // Normal weight for a-t
+		}
+	}
+}
 
 #chat.colored-nicks
 {
-	.user.color-1 { color: h(225, 100%, 70%); }
-	.user.color-2 { color: h(157.5, 100%, 70%); }
-	.user.color-3 { color: h(135, 100%, 30%); }
-	.user.color-4 { color: h(101.25, 100%, 40%); }
-	.user.color-5 { color: h(22.5, 100%, 70%); }
-	.user.color-6 { color: h(337.5, 100%, 70%); }
-	.user.color-7 { color: h(180, 100%, 30%); }
-	.user.color-8 { color: h(67.5, 100%, 70%); }
-	.user.color-9 { color: h(168.75, 100%, 40%); }
-	.user.color-10 { color: h(78.75, 100%, 50%); }
-	.user.color-11 { color: h(0, 100%, 50%); }
-	.user.color-12 { color: h(348.75, 100%, 50%); }
-	.user.color-13 { color: h(258.75, 100%, 50%); }
-	.user.color-14 { color: h(146.25, 100%, 50%); }
-	.user.color-15 { color: h(56.25, 100%, 50%); }
-	.user.color-16 { color: h(213.75, 100%, 50%); }
-	.user.color-17 { color: h(33.75, 100%, 50%); }
-	.user.color-18 { color: h(202.5, 100%, 70%); }
-	.user.color-19 { color: h(270, 100%, 50%); }
-	.user.color-20 { color: h(236.25, 100%, 60%); }
-	.user.color-21 { color: h(292.5, 100%, 70%); }
-	.user.color-22 { color: h(315, 100%, 30%); }
-	.user.color-23 { color: h(123.75, 100%, 50%); }
-	.user.color-24 { color: h(303.75, 100%, 50%); }
-	.user.color-25 { color: h(191.25, 100%, 50%); }
-	.user.color-26 { color: h(247.5, 100%, 70%); }
-	.user.color-27 { color: h(326.25, 100%, 50%); }
-	.user.color-28 { color: h(11.25, 100%, 60%); }
-	.user.color-29 { color: h(90, 100%, 30%); }
-	.user.color-30 { color: h(45, 100%, 40%); }
-	.user.color-31 { color: h(112.5, 100%, 70%); }
-	.user.color-32 { color: h(281.25, 100%, 50%); }
+	.from .user {
+		display: inline-block;
+		width: 100%;
+
+		&:after {
+			padding-left: 8px;
+		}
+	}
+
+	@for $i from 1 through 32 {
+		$letter: 0;
+
+		.user.color-#{$i} {
+			color: var(--color-#{$i});
+			position: relative;
+			@include extra_color($i, $letter);
+
+			@each $lower, $upper in $chars {
+				&[data-name^='#{$lower}'], &[data-name^='#{$upper}'] {
+					color: var(--color-#{$i}#{$upper});
+					@include extra_color($i, $letter, $upper);
+				}
+				$letter: $letter + 1;
+			}
+		}
+	}
+
+	.userlist 
+	{
+		@for $i from 1 through 32 {
+			$letter: 0;
+
+			.user.color-#{$i} {
+				//color: var(--color-white);
+				//font-weight: normal;
+
+				@each $lower, $upper in $chars {
+					&[data-name^='#{$lower}'], &[data-name^='#{$upper}']
+					{
+						//color: var(--color-white);
+						//font-weight: normal;
+						&::first-letter {
+							color: var(--color-#{$i}#{$upper});
+							@include extra_color($i, $letter, $upper);
+						}
+					}
+					$letter: $letter + 1;
+				}
+			}
+		}
+	}
 }

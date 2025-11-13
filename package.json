@@ -1,10 +1,10 @@
 {
 	"name": "thelounge-theme-industrial",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "A dark monospaced theme for thelounge",
 	"main": "package.json",
 	"license": "MIT",
-	"homepage": "https://github.com/z0mbieparade/thelounge-theme-industrial",
+	"homepage": "https://git.z0m.bi/z0mbi/thelounge-theme-industrial",
 	"thelounge": {
 		"name": "Industrial",
 		"type": "theme",
@@ -13,13 +13,16 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/z0mbieparade/thelounge-theme-industrial.git"
+		"url": "ssh+ssh://git@git.z0m.bi:2222/z0mbi/thelounge-theme-industrial.git"
 	},
 	"bugs": {
-		"url": "https://github.com/z0mbieparade/thelounge-theme-industrial/issues"
+		"url": "https://git.z0m.bi/z0mbi/thelounge-theme-industrial/issues"
 	},
 	"keywords": [
 		"thelounge",
-		"thelounge-theme"
+		"thelounge-theme",
+		"ASCII",
+		"dark",
+		"monospaced"
 	]
 }
