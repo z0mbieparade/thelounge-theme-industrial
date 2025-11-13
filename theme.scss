@@ -2,6 +2,8 @@
 @use "sass:map";
 @use "sass:math";
 @use "sass:list";
+// @import url('https://fonts.googleapis.com/css?family=Major+Mono+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cutive+Mono&family=Kode+Mono:wght@400..700&family=Major+Mono+Display&family=Nova+Mono&family=Share+Tech+Mono&family=Syne+Mono&family=VT323&display=swap');
 
 /*!
  * Industrial
@@ -107,20 +109,66 @@ $darker: 0; //makes the lightest color darker
 // This creates a consistent shuffle that remains the same across renders
 // Index 8 and 26 (letter Z) remain in place
 $shuffle-map: (
-	1: 17, 2: 5, 3: 23, 4: 11, 5: 29, 6: 3, 7: 19, 9: 31, 10: 14,
-	11: 27, 12: 2, 13: 20, 14: 9, 15: 25, 16: 13, 17: 6, 18: 22, 19: 15, 20: 30,
-	21: 21, 22: 10, 23: 18, 24: 28, 25: 1, 26: 4, 27: 16, 28: 7, 29: 24, 30: 12,
-	31: 32, 32: 26,
-
-	8: 8
+	1: 17, 
+	2: 5, 
+	3: 22, 
+	4: 11, 
+	5: 29, 
+	6: 14,
+	7: 19, 
+	8: 8, //
+	9: 31,
+	10: 3, //
+	11: 27, 
+	12: 2, 
+	13: 20, 
+	14: 9, 
+	15: 25, 
+	16: 13, 
+	17: 6, 
+	18: 23, //
+	19: 15, 
+	20: 30, //
+	21: 21, 
+	22: 10, 
+	23: 18, 
+	24: 28, 
+	25: 1, 
+	26: 4, 
+	27: 16, 
+	28: 7, 
+	29: 24, 
+	30: 12,
+	31: 32, 
+	32: 26
 );
 $shuffle-letters: (
-	'A': 'Q', 'B': 'W', 'C': 'T', 'D': 'R', 'F': 'Y', 'G': 'U', 'H': 'I',
-	'I': 'O', 'J': 'P', 'K': 'M', 'L': 'S', 'M': 'K', 'N': 'F', 'O': 'G', 'P': 'H',
-	'Q': 'J', 'R': 'D', 'S': 'L', 'T': 'A', 'U': 'X', 'V': 'C', 'W': 'V', 'X': 'B',
-	'Y': 'N',
-
-	'E': 'E', 'Z': 'Z', 
+	'A': 'Q', 
+	'B': 'W', 
+	'C': 'T', 
+	'D': 'R', 
+	'E': 'E', //
+	'F': 'Y', 
+	'G': 'U', 
+	'H': 'I',
+	'I': 'O', 
+	'J': 'P', 
+	'K': 'M', 
+	'L': 'C', 
+	'M': 'K', 
+	'N': 'F', 
+	'O': 'G', 
+	'P': 'H',
+	'Q': 'J', 
+	'R': 'D', 
+	'S': 'L', 
+	'T': 'A', 
+	'U': 'X', 
+	'V': 'S', 
+	'W': 'V', 
+	'X': 'B',
+	'Y': 'N', 
+	'Z': 'Z', //
 );
 
 // Function to shuffle an index using the fixed permutation map
@@ -307,8 +355,6 @@ $shuffle-letters: (
 	font-weight: bold;
 }
 
-@import url('https://fonts.googleapis.com/css?family=Major+Mono+Display&display=swap');
-
 $letter-colors: ();
 $color-colors: ();
 
@@ -331,13 +377,25 @@ $color-colors: ();
 
 	$letter: 0;
 	@each $lower, $upper in $chars {
+		$letter-color: map.get($letter-colors, $upper); 
+		--color-shuff-#{$upper}: #{map.get($letter-color, 'hsla')};
+		$letter: $letter + 1;
+	}
+
+	@for $i from 1 through 32 {
+		$color-color: map.get($color-colors, $i);
+		--color-shuff-#{$i}: #{map.get($color-color, 'hsla')};
+	}
+
+	$letter: 0;
+	@each $lower, $upper in $chars {
 		$letter-color: map.get($letter-colors, $upper);
 		$h-letter: map.get($letter-color, 'h');
 		@for $i from 1 through 32 {
 			$color-color: map.get($color-colors, $i);
 			$h-color: map.get($color-color, 'h');
 
-			$h: lerp($h-letter, $h-color, 0.2);
+			$h: lerp($h-letter, $h-color, 0.7);
 			$s: map.get($letter-color, 's');
 			$l: map.get($letter-color, 'l');
 			$a: map.get($letter-color, 'a');
@@ -844,7 +902,7 @@ code
 		border: 1px solid rgba(255,255,255,.35);
 
 		&:before {
-			color: rgba(255,255,255,.7);
+			color: rgba(255,255,255);
 			background-color: transparent;
 			padding-bottom: 0;
 			@include lower_mono();
@@ -988,45 +1046,157 @@ code
 		}
 	}
 
+	.user 
+	{
+		font-size: 1rem;
+		line-height: 1rem;
+
+		&.color-2,
+		&.color-4,
+		&.color-7,
+		&.color-13,
+		&.color-19
+		{
+			font-family: "Share Tech Mono", monospace !important;
+		}
+
+		&.color-9,
+		&.color-14,
+		&.color-17,
+		&.color-20,
+		&.color-27
+		{
+			font-family: "Nova Mono", monospace !important;
+		}
+
+		&.color-1,
+		&.color-8, 
+		&.color-10,
+		&.color-15,
+		&.color-32
+		{
+			font-family: "Syne Mono", monospace !important;
+		}
+
+		&.color-11,
+		&.color-16, 
+		&.color-22,
+		&.color-31
+		{
+			font-family: "Kode Mono", monospace !important;
+		}
+
+		&.color-5,
+		&.color-17,
+		&.color-23, 
+		&.color-26,
+		&.color-30
+		{
+			font-size: 1.1rem;
+			font-family: "Cutive Mono", monospace !important;
+		}
+
+		&.color-3,
+		&.color-6,
+		&.color-12,
+		&.color-18,
+		&.color-21
+		{
+			font-family: "VT323", monospace !important;
+			font-size: 1.3rem;
+			line-height: 1rem;
+		}
+
+		&[data-name^='Bl'],
+		&[data-name^='bl'],
+		&[data-name^='Eu'],
+		&[data-name^='eu'],
+		&[data-name^='Pi'],
+		&[data-name^='pi'],
+		&[data-name^='kr'],
+		&[data-name^='Kr']
+		{
+			font-size: 1.1rem;
+			line-height: 1rem;
+			font-family: "Cutive Mono", monospace !important;
+		}
+
+		&[data-name^='oo'],
+		&[data-name^='Oo'],
+		&[data-name^='ew'],
+		&[data-name^='Ew']
+		{
+			font-size: 1rem;
+			line-height: 1rem;
+			font-family: "Kode Mono", monospace !important;
+		}
+
+		&[data-name^='ap'],
+		&[data-name^='Ap'],
+		&[data-name^='sk'],
+		&[data-name^='Sk'],
+		&[data-name^='wa'],
+		&[data-name^='Wa'],
+		&[data-name^='lu'],
+		&[data-name^='Lu']
+		{
+			font-size: 1rem;
+			line-height: 1rem;
+			font-family: "Nova Mono", monospace !important;
+		}
+
+		&[data-name^='An'],
+		&[data-name^='an'],
+		&[data-name^='Sp'],
+		&[data-name^='sp'],
+		&[data-name^='pl'],
+		&[data-name^='Pl']
+		{
+			font-size: 1rem;
+			line-height: 1rem;
+			font-family: "Share Tech Mono", monospace !important;
+		}
+
+		&[data-name^='z0']
+		{
+			font-size: 1rem;
+			line-height: 1rem;
+			font-family: "Syne Mono", monospace !important;
+		}
+
+		&[data-name^='ev'],
+		&[data-name^='Ev'],
+		&[data-name^='ma'],
+		&[data-name^='Ma'],
+		&[data-name^='euk'],
+		&[data-name^='Euk']
+		{
+			font-family: "VT323", monospace !important;
+			font-size: 1.3rem;
+			line-height: 1rem;
+		}
+	}
+
+	.user-mode .user
+	{
+		line-height: 1.4rem;
+	}
+	
+
 	@for $i from 1 through 32 {
 		$letter: 0;
 
 		.user.color-#{$i} {
 			color: var(--color-#{$i});
 			position: relative;
-			@include extra_color($i, $letter);
+			// @include extra_color($i, $letter);
 
 			@each $lower, $upper in $chars {
 				&[data-name^='#{$lower}'], &[data-name^='#{$upper}'] {
 					color: var(--color-#{$i}#{$upper});
-					@include extra_color($i, $letter, $upper);
+					// @include extra_color($i, $letter, $upper);
 				}
 				$letter: $letter + 1;
-			}
-		}
-	}
-
-	.userlist 
-	{
-		@for $i from 1 through 32 {
-			$letter: 0;
-
-			.user.color-#{$i} {
-				//color: var(--color-white);
-				//font-weight: normal;
-
-				@each $lower, $upper in $chars {
-					&[data-name^='#{$lower}'], &[data-name^='#{$upper}']
-					{
-						//color: var(--color-white);
-						//font-weight: normal;
-						&::first-letter {
-							color: var(--color-#{$i}#{$upper});
-							@include extra_color($i, $letter, $upper);
-						}
-					}
-					$letter: $letter + 1;
-				}
 			}
 		}
 	}
