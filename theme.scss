@@ -378,13 +378,13 @@ $color-colors: ();
 	$letter: 0;
 	@each $lower, $upper in $chars {
 		$letter-color: map.get($letter-colors, $upper); 
-		--color-shuff-#{$upper}: #{map.get($letter-color, 'hsla')};
+		--color-shift-#{$upper}: #{map.get($letter-color, 'hsla')};
 		$letter: $letter + 1;
 	}
 
 	@for $i from 1 through 32 {
 		$color-color: map.get($color-colors, $i);
-		--color-shuff-#{$i}: #{map.get($color-color, 'hsla')};
+		--color-shift-#{$i}: #{map.get($color-color, 'hsla')};
 	}
 
 	$letter: 0;
