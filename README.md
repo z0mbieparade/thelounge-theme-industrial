@@ -1,5 +1,7 @@
 # thelounge-theme-industrial
-A dark 16-color monospaced theme for [TheLounge](https://thelounge.chat/), a self-hosted web IRC client.
+A 16-color monospaced theme for [TheLounge](https://thelounge.chat/), a self-hosted web IRC client.
+
+Default dark mode, but follows your system theme settings.
 
 ![Channel View](./assets/chan.png)
 

@@ -81,17 +81,18 @@
 		gap: 4px;
 		width: 240px;
 		padding: 8px;
-		background: #111;
-		border: 1px solid #444;
-		color: #999;
+		background: var(--body-bg-color);
+		border: 1px solid var(--body-color-muted);
+		color: var(--body-color-muted);
 		font: 11px/1.5 monospace;
 	}
 
 	#harness-controls textarea,
 	#harness-controls button {
-		background: #000;
-		color: #eee;
-		border: 1px solid #444;
+		background: #141414;
+		background: color-mix(in srgb, var(--body-color) 8%, var(--body-bg-color));
+		color: var(--body-color);
+		border: 1px solid var(--body-color-muted);
 		font: 11px/1.4 monospace;
 		padding: 4px;
 	}

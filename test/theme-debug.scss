@@ -3,23 +3,28 @@
 @use "sass:map";
 @use "../palette" as *;
 
-$letter-colors: letter-colors();
-$color-colors: color-colors();
-
-:root {
+// Both palettes for one curve, so the harness reports whichever mode it is being read in.
+@mixin debug-palette($curve, $nudge) {
 	// Declaration order - which is why these do not match the column of the same letter.
-	@each $upper, $color in letter-colors($shuffled: false) {
+	@each $upper, $color in letter-colors($shuffled: false, $curve: $curve, $nudge: $nudge) {
 		--color-#{$upper}: #{map.get($color, 'hsla')};
 	}
 
 	// The same palettes after the shuffle - what the matrix actually reads.
+	$letters: letter-colors($shuffled: true, $curve: $curve, $nudge: $nudge);
+	$classes: color-colors($curve, $nudge);
+
 	@each $lower, $upper in $chars {
-		--color-shift-#{$upper}: #{map.get(map.get($letter-colors, $upper), 'hsla')};
+		--color-shift-#{$upper}: #{map.get(map.get($letters, $upper), 'hsla')};
 	}
 
 	@for $i from 1 through 32 {
-		--color-shift-#{$i}: #{map.get(map.get($color-colors, $i), 'hsla')};
+		--color-shift-#{$i}: #{map.get(map.get($classes, $i), 'hsla')};
 	}
+}
+
+:root {
+	@include debug-palette($base-hue-lightness, $lighter);
 
 	// Published so test/nicks.html reads the real lists instead of keeping a copy that drifts.
 	$index: 1;
@@ -29,4 +34,11 @@ $color-colors: color-colors();
 	}
 
 	--irc-names: "#{map.values($irc)}";
+}
+
+// Must stay last, for the same reason as theme.scss: a media query adds no specificity.
+@media (prefers-color-scheme: light) {
+	:root {
+		@include debug-palette($base-hue-lightness-light, -$lighter);
+	}
 }

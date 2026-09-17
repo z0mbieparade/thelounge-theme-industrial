@@ -1,13 +1,15 @@
 {
 	"name": "thelounge-theme-industrial",
 	"version": "1.2.0",
-	"description": "A dark 16-color monospaced theme for thelounge",
+	"description": "A 16-color monospaced theme for thelounge, dark by default with a light mode",
 	"main": "package.json",
 	"license": "MIT",
 	"files": [
 		"theme.css",
 		"theme.scss",
 		"_palette.scss",
+		"_dark-theme.scss",
+		"_light-theme.scss",
 		"assets"
 	],
 	"scripts": {
@@ -37,6 +39,7 @@
 		"thelounge-theme",
 		"ASCII",
 		"dark",
+		"light",
 		"16-color",
 		"industrial",
 		"monospaced"

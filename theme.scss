@@ -1,7 +1,8 @@
 @use "sass:string";
-@use "sass:map";
 @use "sass:list";
 @use "palette" as *;
+@use "dark-theme" as *;
+@use "light-theme" as *;
 // @import url('https://fonts.googleapis.com/css?family=Major+Mono+Display&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cutive+Mono&family=Kode+Mono:wght@400..700&family=Major+Mono+Display&family=Nova+Mono&family=Share+Tech+Mono&family=Syne+Mono&family=VT323&display=swap');
 
@@ -20,66 +21,7 @@
 	font-weight: bold;
 }
 
-$letter-colors: letter-colors();
-$color-colors: color-colors();
-
-:root {
-	// Shuffled, so the base var matches the row it fronts. Nicks starting with punctuation get it.
-	@for $i from 1 through 32 {
-		--color-#{$i}: #{map.get(map.get($color-colors, $i), 'hsla')};
-	}
-
-	@each $lower, $upper in $chars {
-		$letter-color: map.get($letter-colors, $upper);
-		$h-letter: map.get($letter-color, 'h');
-		@for $i from 1 through 32 {
-			$color-color: map.get($color-colors, $i);
-			$h-color: map.get($color-color, 'h');
-
-			$h: ($h-letter + hue-delta($h-letter, $h-color) * 0.7) % 360;
-			$s: map.get($letter-color, 's');
-			// Re-derived at the new hue; carrying the letter's lightness put blues at a yellow's.
-			$l-offset: map.get($letter-color, 'l') - get-hue-lightness($h-letter);
-			$l: get-hue-lightness($h) + $l-offset;
-			$a: map.get($letter-color, 'a');
-
-			--color-#{$i}#{$upper}: #{hsla(round2($h), round2($s) * 1%, round2($l), round2($a))};
-		}
-	}
-
-	--color-white: white;
-	--color-black: black;
-	--color-navy: navy;
-	--color-green: #009a00;
-	--color-red: red;
-	--color-brown: brown;
-	--color-purple: #cc00ff;
-	--color-orange: #FF9E17;
-	--color-yellow: yellow;
-	--color-lime: #29ff29;
-	--color-teal: #00a0a0;
-	--color-cyan: cyan;
-	--color-blue: #2453ff;
-	--color-fuchsia: fuchsia;
-	--color-gray: gray;
-	--color-lightgray: lightgray;
-
-	--body-bg-color: var(--color-black);
-	--window-bg-color: var(--color-black);
-	--body-color: var(--color-white);
-	--body-color-muted: var(--color-gray);
-	--link-color: var(--color-lime);
-	--unread-marker-color: var(--color-fuchsia);
-	--date-marker-color: var(--color-orange);
-	--highlight-bg-color: var(--color-brown);
-	--highlight-border-color: var(--color-orange);
-	--background-light-color: var(--color-black);
-	--button-color: var(--color-lime);
-	--button-text-color-hover: var(--color-black);
-	--overlay-bg-color: var(--color-black);
-	--window-heading-color: var(--color-gray);
-	--upload-progressbar-color: var(--button-color);
-}
+@include dark-theme;
 
 // Size only - `display: none` here would hide the thumb rules below along with the bar.
 ::-webkit-scrollbar {
@@ -88,16 +30,12 @@ $color-colors: color-colors();
 }
 
 /* Samsung Internet and Microsoft Edge (yes, both of them use -webkit- prefix) */
-::-webkit-input-placeholder {
-	color: rgba(128, 128, 128, 1);
-}
-
 ::placeholder {
-	color: rgba(131, 148, 150, 0.9);
 	opacity: 1; /* fix opacity in Firefox */
 }
 
-// Unqualified, so both axes match what `scrollbar-color` does below.
+// Unqualified, so both axes match `scrollbar-color` below. Deliberately mode-independent:
+// this teal clears 4.5:1 on black and on white, so it needs no light counterpart.
 ::-webkit-scrollbar-thumb
 {
 	background: hsl(192, 100%, 25%);
@@ -199,16 +137,10 @@ h1, h2, h3, h4
 
 	.textcomplete-item,
 	.context-menu-item {
-		color: var(--color-white);
+		color: var(--body-color);
 
 		a {
-			color: var(--color-white);
-		}
-
-		&:hover,
-		&:focus,
-		.active {
-			background-color: var(--color-navy);
+			color: var(--body-color);
 		}
 	}
 }
@@ -224,7 +156,7 @@ select.input
 
 select.input option {
 	background-color: var(--button-color);
-	color: var(--color-black);
+	color: var(--body-bg-color);
 	font-weight: bold;
 }
 
@@ -235,10 +167,6 @@ select.input option {
 
 #settings
 {
-	.error {
-		color: var(--color-red);
-	}
-
 	#play,
 	.extra-help {
 		color: var(--color-gray);
@@ -269,7 +197,7 @@ select.input option {
 {
 	&.new-packages,
 	&.new-version {
-		color: var(--color-black);
+		color: var(--body-bg-color);
 		background-color: var(--color-yellow);
 	}
 }
@@ -278,16 +206,11 @@ select.input option {
 code
 {
 	background-color: transparent;
-	color: var(--color-red);
 	font-weight: bold;
 }
 
 #user-specified-css-input {
 	height: 500px;
-}
-
-.scroll-down:hover .scroll-down-arrow {
-	background-color: var(--color-lime);
 }
 
 #sidebar
@@ -300,6 +223,17 @@ code
 		.network {
 			margin-bottom: 10px;
 
+			&.not-connected 
+			{
+				opacity: .6;
+			}
+
+			.collapse-network 
+			{
+				padding-left: 0;
+				width: 22px;
+			}
+
 			.collapse-network-icon {
 				line-height: 24px;
 			}
@@ -309,11 +243,10 @@ code
 	.jump-to-results .channel-list-item,
 	.channel-list-item {
 		padding: 1px 10px;
-		color: var(--color-white);
+		color: var(--body-color);
 
 		&:hover {
 			background-color: transparent;
-			color: var(--color-lime);
 		}
 
 		.not-connected-tooltip,
@@ -330,11 +263,10 @@ code
 
 		.lobby-wrap .name {
 			@include lower_mono();
+			font-size: 15px;
 		}
 
 		.badge {
-			background-color: var(--color-navy);
-			color: var(--color-yellow);
 			font-weight: bold;
 			padding-top: 6px;
 
@@ -344,19 +276,8 @@ code
 			}
 		}
 
-		&.active,
-		&.active:hover {
-			background-color: var(--color-navy);
-		}
-
-		&.not-connected,
-		&.parted-channel {
-			color: var(--color-red)
-		}
-
 		&[data-type=lobby] {
 			padding: 1px 10px;
-			color: var(--color-lime);
 			line-height: 20px;
 
 			.add-channel {
@@ -367,12 +288,6 @@ code
 			&.not-secure.active,
 			&.not-secure .lobby-wrap:hover {
 				color: var(--color-orange)
-			}
-
-			&.not-connected,
-			&.not-connected.active,
-			&.not-connected .lobby-wrap:hover {
-				color: var(--color-red)
 			}
 		}
 	}
@@ -390,7 +305,6 @@ code
 
 	#nick {
 		display: block;
-		color: var(--color-lime);
 		font-weight: bold;
 		flex: 0 0 auto;
 		background-color: inherit;
@@ -422,6 +336,21 @@ code
 }
 
 #chat {
+
+	.header {
+		color: var(--color-white);
+		border: none;
+
+		.title {
+			color: var(--color-white);
+		}
+
+		.topic {
+			color: var(--color-white);
+			font-weight: bold;
+		}
+	}
+	
 	.chat {
 		border-right: 1px solid var(--color-purple);
 	}
@@ -433,16 +362,6 @@ code
 
 	.self .content {
 		color: var(--color-lightgray);
-	}
-
-	.header {
-		background-color: var(--color-navy);
-		border: none;
-
-		.topic {
-			color: var(--color-white);
-			font-weight: bold;
-		}
 	}
 
 	.toggle-content {
@@ -470,10 +389,6 @@ code
 		}
 	}
 
-	table.ban-list td {
-		color: var(--color-red);
-	}
-
 	.notice {
 		.content, .time {
 			color: var(--color-teal) !important;
@@ -494,7 +409,6 @@ code
 
 			.from .user {
 				background-color: var(--color-purple);
-				color: var(--color-yellow) !important;
 				font-weight: bold;
 			}
 
@@ -506,10 +420,6 @@ code
 		.notice .user {
 			color: var(--color-teal) !important;
 		}
-	}
-
-	.content {
-		border-left: 1px solid var(--color-lime);
 	}
 
 	.content, .from, .time {
@@ -524,10 +434,6 @@ code
 	.userlist {
 		border: none;
 
-		.user.active {
-			background-color: var(--color-navy);
-		}
-
 		.search {
 			border: 0;
 			color: var(--body-color);
@@ -541,11 +447,7 @@ code
 	.user-mode {
    		margin-bottom: 0px;
 		padding-bottom: 3px;
-		background-color: rgba(255,255,255,.07);
-		border: 1px solid rgba(255,255,255,.35);
-
 		&:before {
-			color: rgba(255,255,255);
 			background-color: transparent;
 			padding-bottom: 0;
 			@include lower_mono();
@@ -560,52 +462,6 @@ code
 
 			&.active {
 				background-color: transparent;
-				color: var(--color-lime) !important;
-			}
-		}
-
-		&.owner {
-			background-color: rgba(0,220,255,.1);
-			border: 1px solid rgba(0,220,255,.35);
-
-			&:before {
-				color: rgba(0,220,255,1)
-			}
-		}
-
-		&.admin {
-			background-color: rgba(0,255,0,.1);
-			border: 1px solid rgba(0,255,0,.35);
-
-			&:before {
-				color: rgba(0,255,0,1)
-			}
-		}
-
-		&.op {
-			background-color: rgba(253,187,0,.1);
-			border: 1px solid rgba(253,187,0,.35);
-
-			&:before {
-				color: rgba(253,187,0,1)
-			}
-		}
-
-		&.half-op {
-			background-color: rgba(253,70,0,.1);
-			border: 1px solid rgba(253,70,0,.35);
-
-			&:before {
-				color: rgba(253,70,0,1)
-			}
-		}
-
-		&.voice {
-			background-color: rgba(195,0,253,.1);
-			border: 1px solid rgba(195,0,253,.35);
-
-			&:before {
-				color: rgba(195,0,253,1)
 			}
 		}
 	}
@@ -617,11 +473,6 @@ code
 	{
 		&:hover {
 			background-color: transparent;
-			color: var(--color-lime);
-		}
-
-		&.active {
-			background-color: var(--color-navy);
 		}
 	}
 }
@@ -779,4 +630,10 @@ code
 			}
 		}
 	}
+}
+
+// Light must come last: a media query adds no specificity, so an earlier light rule loses to
+// any later dark rule of equal weight.
+@media (prefers-color-scheme: light) {
+	@include light-theme;
 }

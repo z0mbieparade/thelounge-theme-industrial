@@ -17,38 +17,38 @@
 	<link rel="stylesheet" href="theme-debug.css">
 	<style>
 		html, body {
-			background: #000;
+			background: var(--body-bg-color);
 			margin: 0;
 			padding: 24px;
 		}
 
 		.harness-title {
-			color: #fff;
+			color: var(--body-color);
 			font-size: 18px;
 			margin: 0 0 4px;
 		}
 
 		.harness-note {
-			color: #888;
+			color: var(--body-color-muted);
 			font-size: 12px;
 			margin: 0 0 24px;
 			line-height: 1.6;
 		}
 
 		.harness-section {
-			border-top: 1px solid #333;
+			border-top: 1px solid var(--body-color-muted);
 			margin-top: 32px;
 			padding-top: 12px;
 		}
 
 		.harness-section h2 {
-			color: #fff;
+			color: var(--body-color);
 			font-size: 14px;
 			margin: 0 0 2px;
 		}
 
 		.harness-source {
-			color: #666;
+			color: var(--body-color-muted);
 			font-size: 11px;
 			margin: 0 0 12px;
 		}
@@ -64,7 +64,7 @@
 		}
 
 		.harness-caption {
-			color: #666;
+			color: var(--body-color-muted);
 			font-size: 10px;
 			white-space: nowrap;
 			overflow: hidden;
@@ -72,7 +72,7 @@
 		}
 
 		.harness-controls {
-			color: #888;
+			color: var(--body-color-muted);
 			font-size: 12px;
 			display: flex;
 			gap: 16px;
@@ -81,15 +81,15 @@
 		}
 
 		.harness-actual {
-			outline: 1px solid #666;
+			outline: 1px solid var(--body-color-muted);
 			outline-offset: 3px;
 		}
 
 		.harness-frame {
 			width: 100%;
 			height: 520px;
-			border: 1px solid #333;
-			background: #000;
+			border: 1px solid var(--body-color-muted);
+			background: var(--body-bg-color);
 		}
 
 		.harness-matrix {
@@ -106,18 +106,18 @@
 			font-size: 10px;
 			line-height: 22px;
 			text-align: center;
-			background: #000;
+			background: var(--body-bg-color);
 		}
 
 		.harness-axis {
-			outline: 1px solid #444;
+			outline: 1px solid var(--body-color-muted);
 		}
 
 		.harness-tables {
 			display: grid;
 			grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 			gap: 24px;
-			color: #999;
+			color: var(--body-color-muted);
 			font-size: 11px;
 		}
 
@@ -128,8 +128,8 @@
 
 		.harness-tables th {
 			text-align: left;
-			color: #ccc;
-			border-bottom: 1px solid #444;
+			color: var(--body-color);
+			border-bottom: 1px solid var(--body-color-muted);
 		}
 
 		.harness-tables td {
@@ -140,9 +140,10 @@
 		.harness-controls input,
 		.harness-controls select,
 		.harness-controls button {
-			background: #111;
-			color: #eee;
-			border: 1px solid #444;
+			background: #141414;
+			background: color-mix(in srgb, var(--body-color) 8%, var(--body-bg-color));
+			color: var(--body-color);
+			border: 1px solid var(--body-color-muted);
 			padding: 4px 8px;
 			font-size: 12px;
 		}
@@ -154,6 +155,10 @@
 </head>
 <body>
 	<h1 class="harness-title">Industrial - nick rules</h1>
+	<p class="harness-note">
+		Follows your OS light/dark setting. In Firefox devtools, the sun/moon buttons in the
+		Inspector's Rules pane flip it without changing your OS.
+	</p>
 	<p class="harness-note">
 		<label><input type="checkbox" id="base-css-toggle"> load TheLounge's own stylesheet
 		(<code>vendor/thelounge-4.5.2.css</code>) under the theme - faithful cascade, but it brings
@@ -171,9 +176,9 @@
 	<div class="harness-section">
 		<h2>Palette matrix - every --color-&lt;class&gt;&lt;letter&gt;</h2>
 		<p class="harness-source">
-			the matrix loop in theme.scss. Rows are the 32 color classes, columns the 26 first letters; each
+			<code>nick-palette</code> in _palette.scss. Rows are the 32 color classes, columns the 26 first letters; each
 			cell is the color a nick actually gets. The axis headers are the two source palettes,
-			<code>--color-1..32</code> (theme.scss) and <code>--color-A..Z</code> (test/theme-debug.scss).<br>
+			<code>--color-1..32</code> (_dark-theme.scss / _light-theme.scss) and <code>--color-A..Z</code> (test/theme-debug.scss).<br>
 			Hue lerps 70% from the letter toward the class, and saturation and alpha come from the
 			letter; lightness is re-derived at the shifted hue, then offset by however far the
 			letter sat from its own baseline - so a column varies in lightness rather than being
@@ -185,7 +190,7 @@
 			<label>view
 				<select id="palette-view">
 					<option value="swatch">swatch</option>
-					<option value="text">text on black</option>
+					<option value="text">text on background</option>
 					<option value="lightness">lightness only</option>
 				</select>
 			</label>
@@ -196,7 +201,7 @@
 
 	<div class="harness-section">
 		<h2>Source palettes, numerically</h2>
-		<p class="harness-source">The <code>:root</code> palette loops in theme.scss and test/theme-debug.scss, plus the 16 IRC names from <code>$irc</code> in _palette.scss</p>
+		<p class="harness-source"><code>nick-palette</code> in _palette.scss, emitted by theme.scss and test/theme-debug.scss, plus the 16 IRC names from <code>$irc</code> in _palette.scss</p>
 		<div id="palette-tables"></div>
 	</div>
 
@@ -277,7 +282,7 @@
 
 		// One entry per $name-styles group, in map order. Reading until a property is missing
 		// means adding a group to the map needs no change here. The bound is a guard against a
-		// malformed sheet, not a real limit - $name-styles has 11 entries.
+		// malformed sheet, not a real limit.
 		const MAX_NAME_STYLES = 200;
 		const PREFIX_RULES = [];
 
@@ -297,7 +302,7 @@
 		if (!PREFIX_RULES.length || !IRC_NAMES.length) {
 			const warning = document.createElement("p");
 			warning.className = "harness-note";
-			warning.style.color = "#e06";
+			warning.style.color = "var(--unread-marker-color)";
 			warning.textContent =
 				"test/theme-debug.css has not been built, so the name-prefix and IRC sections are " +
 				"empty. Run: npm run build";
@@ -506,7 +511,7 @@
 				const heading = document.createElement("div");
 				heading.className = "harness-caption";
 				heading.style.gridColumn = "1 / -1";
-				heading.style.color = "#aaa";
+				heading.style.color = "var(--body-color)";
 				heading.style.marginTop = "8px";
 				heading.textContent = "$name-styles group " + rule.group + " - " + rule.prefixes.join(" ");
 				cells.push(heading);
