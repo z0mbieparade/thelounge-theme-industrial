@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<!--
+  Captured from a running client, kept verbatim except for these - redo them on a re-capture:
+    1. This doctype and <html>; without it the browser is in quirks mode and the layout dies.
+    2. css/style.css -> vendor/thelounge-4.5.2.css.
+    3. The #theme link -> ../theme.css, the file under test.
+    4. Script and preload tags commented out; they 404, and the bundle would seize the DOM.
+    5. The controls panel and the script at the end, which regenerate the userlist, the
+       message log and the sidebar DM rows.
+-->
+<html lang="en">
+<head>
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+
+	<!-- 4. bundle preloads
+	<link rel="preload" as="script" href="js/loading-error-handlers.js?v=702ab331bb">
+	<link rel="preload" as="script" href="js/bundle.vendor.js?v=702ab331bb">
+	<link rel="preload" as="script" href="js/bundle.js?v=702ab331bb">
+	-->
+
+	<link rel="stylesheet" href="vendor/thelounge-4.5.2.css">
+	<link id="theme" rel="stylesheet" href="../theme.css" data-server-theme="thelounge-theme-industrial">
+	
+	<style id="user-specified-css">
+		</style>
+
+	<title>(5) #channel — The Lounge</title>
+
+	<!-- Browser tab icon -->
+	<link id="favicon" rel="icon" sizes="16x16 32x32 64x64" href="img/favicon-alerted.ico" data-other="img/favicon-alerted.ico" type="image/x-icon">
+
+	<!-- Safari pinned tab icon -->
+	<link rel="mask-icon" href="img/icon-black-transparent-bg.svg" color="#415364">
+
+	<link rel="manifest" href="thelounge.webmanifest">
+
+	<!-- iPhone 4, iPhone 4s, iPhone 5, iPhone 5c, iPhone 5s, iPhone 6, iPhone 6s, iPhone 7, iPhone 7s, iPhone8 -->
+	<link rel="apple-touch-icon" sizes="120x120" href="img/logo-grey-bg-120x120px.png">
+	<!-- iPad and iPad mini @2x -->
+	<link rel="apple-touch-icon" sizes="152x152" href="img/logo-grey-bg-152x152px.png">
+	<!-- iPad Pro -->
+	<link rel="apple-touch-icon" sizes="167x167" href="img/logo-grey-bg-167x167px.png">
+	<!-- iPhone X, iPhone 8 Plus, iPhone 7 Plus, iPhone 6s Plus, iPhone 6 Plus -->
+	<link rel="apple-touch-icon" sizes="180x180" href="img/logo-grey-bg-180x180px.png">
+
+	<!-- Windows 8/10 - Edge tiles -->
+	<meta name="application-name" content="The Lounge">
+	<meta name="msapplication-TileColor" content="#000000">
+	<meta name="msapplication-square70x70logo" content="img/logo-grey-bg-120x120px.png">
+	<meta name="msapplication-square150x150logo" content="img/logo-grey-bg-152x152px.png">
+
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="theme-color" content="#000000">
+
+	</head>
+	<body class="" data-transports="[&quot;polling&quot;,&quot;websocket&quot;]">
+
+<!-- 5. Harness controls. Fixed-position so they are not a flex child of the capture. -->
+<div id="harness-controls">
+	<label for="harness-users">users - one per line, optional mode sigil <code>~ ! @ % +</code></label>
+	<textarea id="harness-users" rows="6" spellcheck="false"
+		placeholder="@alice&#10;+bob&#10;carol&#10;&#10;(blank = generate a random channel)"></textarea>
+	<div class="harness-row">
+		<button id="harness-apply" type="button">apply</button>
+		<button id="harness-random" type="button">random</button>
+		<span id="harness-status"></span>
+	</div>
+</div>
+<style>
+	#harness-controls {
+		position: fixed;
+		bottom: 8px;
+		left: 8px;
+		z-index: 9999;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		width: 240px;
+		padding: 8px;
+		background: #111;
+		border: 1px solid #444;
+		color: #999;
+		font: 11px/1.5 monospace;
+	}
+
+	#harness-controls textarea,
+	#harness-controls button {
+		background: #000;
+		color: #eee;
+		border: 1px solid #444;
+		font: 11px/1.4 monospace;
+		padding: 4px;
+	}
+
+	#harness-controls .harness-row {
+		display: flex;
+		gap: 6px;
+		align-items: center;
+	}
+</style>
+
+		<div id="app" data-v-app="">
+		<div id="viewport" class="notified menu-open userlist-open" role="tablist">
+		<aside id="sidebar">
+		<div class="scrollable-area">
+		<div class="logo-container">
+		<img src="img/logo-transparent-bg.svg" class="logo" alt="The Lounge" role="presentation">
+		<img src="img/logo-transparent-bg-inverted.svg" class="logo-inverted" alt="The Lounge" role="presentation">
+		<!---->
+		</div>
+		<div role="navigation" aria-label="Network and Channel list">
+		<div class="jump-to-input">
+		<input placeholder="Jump to..." type="search" class="search input mousetrap" aria-label="Search among the channel list" tabindex="-1">
+		</div>
+		<div class="networks">
+		<div id="network-ff28806e-7737-45fc-8879-8b2a928f88e5" class="network" role="region" aria-live="polite" draggable="false">
+		<div class="channel-list-item has-unread" aria-label="lobby: SERVERNAME (1 unread message)" title="lobby: SERVERNAME (1 unread message)" data-name="SERVERNAME" data-type="lobby" aria-controls="#chan-1" role="tab" isjoinchannelshown="false" aria-selected="false">
+		<button aria-controls="network-ff28806e-7737-45fc-8879-8b2a928f88e5" aria-label="Collapse" aria-expanded="true" class="collapse-network">
+		<span class="collapse-network-icon">
+		</span>
+		</button>
+		<div class="lobby-wrap">
+		<span title="SERVERNAME" class="name">SERVERNAME</span>
+		<!---->
+		<!---->
+		<span class="badge">1</span>
+		</div>
+		<span aria-label="Join a channel…" class="add-channel-tooltip tooltipped tooltipped-w tooltipped-no-touch">
+		<button class="add-channel" aria-controls="join-channel-1" aria-label="Join a channel…">
+		</button>
+		</span>
+		</div>
+		<!---->
+		<div class="channels">
+		<div class="channel-list-item active" aria-label="channel: #channel " title="channel: #channel " data-name="#channel" data-type="channel" aria-controls="#chan-2" role="tab" data-item="2" aria-selected="true" draggable="false">
+		<span class="name">#channel</span>
+		<!---->
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Leave">
+		<button class="close" aria-label="Leave">
+		</button>
+		</span>
+		</div>
+		<div class="channel-list-item" aria-label="channel: #test " title="channel: #test " data-name="#test" data-type="channel" aria-controls="#chan-3" role="tab" data-item="3" aria-selected="false" draggable="false">
+		<span class="name">#test</span>
+		<!---->
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Leave">
+		<button class="close" aria-label="Leave">
+		</button>
+		</span>
+		</div>
+		<div class="channel-list-item" aria-label="query: betab0t " title="query: betab0t " data-name="betab0t" data-type="query" aria-controls="#chan-4" role="tab" data-item="4" aria-selected="false">
+		<span class="name">betab0t</span>
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Close">
+		<button class="close" aria-label="Close">
+		</button>
+		</span>
+		</div>
+		<div class="channel-list-item" aria-label="query: euro " title="query: euro " data-name="euro" data-type="query" aria-controls="#chan-5" role="tab" data-item="5" aria-selected="false">
+		<span class="name">euro</span>
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Close">
+		<button class="close" aria-label="Close">
+		</button>
+		</span>
+		</div>
+		<div class="channel-list-item" aria-label="query: everthat " title="query: everthat " data-name="everthat" data-type="query" aria-controls="#chan-6" role="tab" data-item="6" aria-selected="false">
+		<span class="name">everthat</span>
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Close">
+		<button class="close" aria-label="Close">
+		</button>
+		</span>
+		</div>
+		<div class="channel-list-item" aria-label="query: luckyloo " title="query: luckyloo " data-name="luckyloo" data-type="query" aria-controls="#chan-7" role="tab" data-item="7" aria-selected="false">
+		<span class="name">luckyloo</span>
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Close">
+		<button class="close" aria-label="Close">
+		</button>
+		</span>
+		</div>
+		<div class="channel-list-item" aria-label="query: ircb0t " title="query: ircb0t " data-name="ircb0t" data-type="query" aria-controls="#chan-8" role="tab" data-item="8" aria-selected="false">
+		<span class="name">ircb0t</span>
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Close">
+		<button class="close" aria-label="Close">
+		</button>
+		</span>
+		</div>
+		<div class="channel-list-item" aria-label="query: necronomicon " title="query: necronomicon " data-name="necronomicon" data-type="query" aria-controls="#chan-9" role="tab" data-item="9" aria-selected="false">
+		<span class="name">necronomicon</span>
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Close">
+		<button class="close" aria-label="Close">
+		</button>
+		</span>
+		</div>
+		<div class="channel-list-item" aria-label="query: tangofoxtrot " title="query: tangofoxtrot " data-name="tangofoxtrot" data-type="query" aria-controls="#chan-10" role="tab" data-item="10" aria-selected="false">
+		<span class="name">tangofoxtrot</span>
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Close">
+		<button class="close" aria-label="Close">
+		</button>
+		</span>
+		</div>
+		<div class="channel-list-item" aria-label="query: tulsa " title="query: tulsa " data-name="tulsa" data-type="query" aria-controls="#chan-11" role="tab" data-item="11" aria-selected="false">
+		<span class="name">tulsa</span>
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Close">
+		<button class="close" aria-label="Close">
+		</button>
+		</span>
+		</div>
+		</div>
+		</div>
+		<div id="network-e9bc8667-a951-4920-b3a0-785182bb74a6" class="not-connected network" role="region" aria-live="polite">
+		<div class="channel-list-item has-unread not-connected" aria-label="lobby: ServerOther (3 unread messages)" title="lobby: ServerOther (3 unread messages)" data-name="ServerOther" data-type="lobby" aria-controls="#chan-12" role="tab" isjoinchannelshown="false" aria-selected="false">
+		<button aria-controls="network-e9bc8667-a951-4920-b3a0-785182bb74a6" aria-label="Collapse" aria-expanded="true" class="collapse-network">
+		<span class="collapse-network-icon">
+		</span>
+		</button>
+		<div class="lobby-wrap">
+		<span title="ServerOther" class="name">ServerOther</span>
+		<!---->
+		<span class="not-connected-tooltip tooltipped tooltipped-w" aria-label="Disconnected">
+		<span class="not-connected-icon">
+		</span>
+		</span>
+		<span class="badge">3</span>
+		</div>
+		<span aria-label="Join a channel…" class="add-channel-tooltip tooltipped tooltipped-w tooltipped-no-touch">
+		<button class="add-channel" aria-controls="join-channel-12" aria-label="Join a channel…">
+		</button>
+		</span>
+		</div>
+		<!---->
+		<div class="channels">
+		<div class="channel-list-item parted-channel" aria-label="channel: #default " title="channel: #default " data-name="#default" data-type="channel" aria-controls="#chan-13" role="tab" data-item="13" aria-selected="false" draggable="false">
+		<span class="name">#default</span>
+		<!---->
+		<span class="parted-channel-tooltip tooltipped tooltipped-w" aria-label="Not currently joined">
+		<span class="parted-channel-icon">
+		</span>
+		</span>
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Leave">
+		<button class="close" aria-label="Leave">
+		</button>
+		</span>
+		</div>
+		<div class="channel-list-item" aria-label="query: epic " title="query: epic " data-name="epic" data-type="query" aria-controls="#chan-14" role="tab" data-item="14" aria-selected="false">
+		<span class="name">epic</span>
+		<!---->
+		<span class="close-tooltip tooltipped tooltipped-w" aria-label="Close">
+		<button class="close" aria-label="Close">
+		</button>
+		</span>
+		</div>
+		</div>
+		</div>
+		</div>
+		</div>
+		</div><!-- .scrollable-area -->
+		<footer id="footer">
+		<span class="tooltipped tooltipped-n tooltipped-no-touch" aria-label="Connect to network">
+		<a href="#/connect" class="" role="tab" aria-controls="connect">
+		<button class="icon connect" aria-selected="false">
+		</button>
+		</a>
+		</span>
+		<span class="tooltipped tooltipped-n tooltipped-no-touch" aria-label="Settings">
+		<a href="#/settings" class="" role="tab" aria-controls="settings">
+		<button class="icon settings" aria-selected="false">
+		</button>
+		</a>
+		</span>
+		<span class="tooltipped tooltipped-n tooltipped-no-touch" aria-label="Help">
+		<a href="#/help" class="" role="tab" aria-controls="help">
+		<button aria-selected="false" class="icon help">
+		</button>
+		</a>
+		</span>
+		</footer>
+		</aside>
+		<div id="sidebar-overlay" aria-hidden="true">
+		</div>
+<div id="chat-container" class="window" data-current-channel="#channel" lang="">
+<div id="chat" class="colored-nicks">
+<div id="chan-2" class="chat-view" data-type="channel" aria-label="#channel" role="tabpanel">
+<div class="header">
+<button class="lt" aria-label="Toggle channel list">
+</button>
+<span class="title" aria-label="Currently open channel">#channel</span>
+<span class="topic" title="📌 ALERT MESSAGE ¦ some topic">📌 ALERT MESSAGE ¦ some topic</span>
+<form class="message-search">
+<div class="input-wrapper">
+<input type="search" name="search" class="input" placeholder="Search messages…">
+</div>
+<button class="search" type="button" aria-label="Search messages in this channel">
+</button>
+</form>
+<button class="mentions" aria-label="Open your mentions">
+</button>
+<button class="menu" aria-label="Open the context menu">
+</button>
+<span class="rt-tooltip tooltipped tooltipped-w" aria-label="Toggle user list">
+<button class="rt" aria-label="Toggle user list">
+</button>
+</span>
+</div>
+<div class="chat-content">
+<div class="scroll-down tooltipped tooltipped-w tooltipped-no-touch scroll-down-shown" aria-label="Jump to recent messages">
+<div class="scroll-down-arrow">
+</div>
+</div>
+<aside class="userlist" aria-label="User list for #channel">
+<div class="count">
+<input placeholder="20 users" type="search" class="search" aria-label="Search among the user list" tabindex="-1">
+</div>
+<div class="names">
+<div class="user-mode admin">
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="user color-3" data-name="z0mbi" role="button">!z0mbi</span>
+</div>
+<div class="user-mode half-op">
+<span class="user color-10" data-name="tulsa" role="button">%tulsa</span>
+</div>
+<div class="user-mode voice">
+<span class="user color-6" data-name="anony" role="button">+anony</span>
+<span class="user color-9" data-name="asoda" role="button">+asoda</span>
+<span class="user color-13" data-name="blunder" role="button">+blunder</span>
+<span class="user color-20" data-name="eukie" role="button">+eukie</span>
+<span class="user color-28" data-name="euro" role="button">+euro</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="user color-16" data-name="krazytrain" role="button">+krazytrain</span>
+<span class="user color-26" data-name="LightShow" role="button">+LightShow</span>
+<span class="user color-19" data-name="luckyloo" role="button">+luckyloo</span>
+<span class="user color-27" data-name="MadHatter" role="button">+MadHatter</span>
+<span class="user color-25" data-name="meow" role="button">+meow</span>
+<span class="user color-11" data-name="necronomicon" role="button">+necronomicon</span>
+<span class="user color-29" data-name="Pinetree" role="button">+Pinetree</span>
+<span class="user color-4" data-name="skales" role="button">+skales</span>
+<span class="user color-5" data-name="SpaceAttack" role="button">+SpaceAttack</span>
+<span class="user color-16" data-name="tangofoxtrot" role="button">+tangofoxtrot</span>
+<span class="user color-4" data-name="wasteland" role="button">+wasteland</span>
+</div>
+</div>
+</aside>
+<div class="chat" tabindex="-1">
+<div class="show-more" style="">
+<button class="btn">
+<span>Show older messages</span>
+</button>
+</div>
+<div class="messages" role="log" aria-live="polite" aria-relevant="additions">
+<div aria-label="15 September 2026" class="date-marker-container tooltipped tooltipped-s">
+<div class="date-marker">
+<span aria-label="Yesterday" class="date-marker-text">
+</span>
+</div>
+</div>
+<!---->
+<div id="msg-143203" class="msg self" data-type="message" data-from="z0mbi">
+<span aria-hidden="true" aria-label="15 September 2026, 10:27:52" class="time tooltipped tooltipped-e">10:27 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-3" data-name="z0mbi" role="button">!z0mbi</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->i really hope we get a real winter this year</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143205" class="msg" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 10:28:35" class="time tooltipped tooltipped-e">10:28 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->local blueberries were so good this year, that I don't think I'll ever be able to eat frozen or non local again.</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143206" class="msg previous-source" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 10:28:46" class="time tooltipped tooltipped-e">10:28 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->I'll probably buy some frozen to put into smoothies</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143209" class="msg" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 10:29:41" class="time tooltipped tooltipped-e">10:29 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->IIRC polar vortex should be very bad this year, part of...</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143211" class="msg previous-source" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 10:29:43" class="time tooltipped tooltipped-e">10:29 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->!wiki 2026–2027 El Niño event</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143212" class="msg" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 10:29:43" class="time tooltipped tooltipped-e">10:29 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="irc-bold irc-fg46">Wiki </span>
+<span class="irc-bold irc-fg46 irc-underline">2026–2027 El Niño event</span>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143213" class="msg previous-source" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 10:29:44" class="time tooltipped tooltipped-e">10:29 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->The forecast for the 2026–2027 El Niño is severe and sometimes referred to as a super El Niño or Godzilla El Niño. The latter phrase was coined by NASA scientist Bill Patzert in 2015 vis-à-vis the historic 1997–1998 El Niño event, and has since gone from casual scientific parlance to public usage.</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143214" class="msg previous-source" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 10:29:44" class="time tooltipped tooltipped-e">10:29 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<a href="https://en.wikipedia.org/wiki/2026%E2%80%932027%20El%20Ni%C3%B1o%20event" dir="auto" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/2026%E2%80%932027%20El%20Ni%C3%B1o%20event</a> <span class="irc-fg46">(1/2)</span>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143219" class="msg" data-type="message" data-from="asoda">
+<span aria-hidden="true" aria-label="15 September 2026, 10:30:41" class="time tooltipped tooltipped-e">10:30 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-9" data-name="asoda" role="button">+asoda</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->doesnt el nino divert the polar stuff to the northeast US <a href="https://oceanservice.noaa.gov/facts/elnino.jpg" dir="auto" target="_blank" rel="noopener">https://oceanservice.noaa.gov/facts/elnino.jpg</a>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143220" class="msg" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 10:30:54" class="time tooltipped tooltipped-e">10:30 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="user color-9" data-name="asoda" role="button" dir="auto">asoda</span>: what waffle maker should I get? my old one broke. I don't like any of the review sites and ATK advice also leaves me unsure.</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143221" class="msg" data-type="message" data-from="asoda">
+<span aria-hidden="true" aria-label="15 September 2026, 10:31:39" class="time tooltipped tooltipped-e">10:31 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-9" data-name="asoda" role="button">+asoda</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->how serious about waffles are you</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143222" class="msg previous-source" data-type="message" data-from="asoda">
+<span aria-hidden="true" aria-label="15 September 2026, 10:31:47" class="time tooltipped tooltipped-e">10:31 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-9" data-name="asoda" role="button">+asoda</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->definitely get one that rotates</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143223" class="msg" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 10:33:09" class="time tooltipped tooltipped-e">10:33 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->you sure? Cuisinart Round Flip Belgian Waffle Maker WAF-F30NAS it is then.</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143224" class="msg previous-source" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 10:33:26" class="time tooltipped tooltipped-e">10:33 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->ATK was between that and breville squares.</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143372" class="msg" data-type="message" data-from="necronomicon">
+<span aria-hidden="true" aria-label="15 September 2026, 11:10:46" class="time tooltipped tooltipped-e">11:10 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-11" data-name="necronomicon" role="button">+necronomicon</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->his gf is getting her masters in antennae programming/design which i think it pretty wicked cool</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143375" class="msg self" data-type="message" data-from="z0mbi">
+<span aria-hidden="true" aria-label="15 September 2026, 11:10:57" class="time tooltipped tooltipped-e">11:10 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-3" data-name="z0mbi" role="button">!z0mbi</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->neat</span>
+</div>
+<!---->
+<!---->
+<div id="msg-143422" class="msg" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 11:19:54" class="time tooltipped tooltipped-e">11:19 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->uhh... loongson</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144226" class="msg" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 13:42:01" class="time tooltipped tooltipped-e">13:42 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->!np</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144227" class="msg" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 13:42:03" class="time tooltipped tooltipped-e">13:42 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="irc-fg46">e﻿verthat</span> is now playing: <span class="irc-fg44">Pop Will Eat Itself - King KIsser</span>
+<span class="irc-fg14"> (Anti-Nasty League)</span>
+<span class="irc-fg4"> ♬ </span>[<span class="irc-fg14">4</span>/<span class="irc-fg14">866</span>] (<span class="irc-fg46">industrial</span>, <span class="irc-fg46">alternative</span>, <span class="irc-fg46">grebo</span>, <span class="irc-fg46">electronic</span>)</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144228" class="msg" data-type="message" data-from="tulsa">
+<span aria-hidden="true" aria-label="15 September 2026, 13:42:48" class="time tooltipped tooltipped-e">13:42 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-10" data-name="tulsa" role="button">+tulsa</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->!np</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144229" class="msg" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 13:42:49" class="time tooltipped tooltipped-e">13:42 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="irc-fg46">t﻿ulsa</span> is now playing: <span class="irc-fg44">Cabaret Nocturne - Astro Tango</span>
+<span class="irc-fg14"> (2014)</span>
+<span class="irc-fg4"> ♬ </span>[<span class="irc-fg14">16</span>/<span class="irc-fg4">3.3K</span>] (<span class="irc-fg46">electronic</span>, <span class="irc-fg46">synthpop</span>, <span class="irc-fg46">nu-disco</span>, <span class="irc-fg46">synth pop</span>)</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144233" class="msg previous-source" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 13:44:19" class="time tooltipped tooltipped-e">13:44 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->!8ball should I?</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144234" class="msg" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 13:44:19" class="time tooltipped tooltipped-e">13:44 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="irc-fg53">Concentrate and ask again</span>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144320" class="msg previous-source" data-type="message" data-from="evarthat">
+<span aria-hidden="true" aria-label="15 September 2026, 14:22:40" class="time tooltipped tooltipped-e">14:22 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-32" data-name="evarthat" role="button">+evarthat</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->!np</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144321" class="msg" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 14:22:41" class="time tooltipped tooltipped-e">14:22 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="irc-fg46">e﻿verthat</span> is now playing: <span class="irc-fg44">Keith Jarrett Gary Peacock &amp; Jack DeJohnette - Bye Bye Blackbird</span>
+<span class="irc-fg4"> ♬ </span>[<span class="irc-fg14">4</span>/<span class="irc-fg14">31</span>] (<span class="irc-fg14">No Tags</span>)</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144478" class="msg" data-type="join" data-from="krazytrain">
+<span aria-hidden="true" aria-label="15 September 2026, 14:59:42" class="time tooltipped tooltipped-e">14:59 </span>
+<span class="from">
+<span class="only-copy">***&nbsp;</span>
+</span>
+<span class="content">
+<span class="user color-16" data-name="krazytrain" role="button">krazytrain</span>
+<i class="hostmask"> (krazytrain@oontz-01i.jk2.duc5b2.IP)</i>
+<!---->
+<i class="realname"> (krazytrain)</i> has joined the channel </span>
+</div>
+<!---->
+<!---->
+<div id="msg-144479" class="msg" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 14:59:42" class="time tooltipped tooltipped-e">14:59 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="irc-fg46">k﻿rolden</span> says: <span class="irc-fg52">m</span>
+<span class="irc-fg53">m</span>
+<span class="irc-fg54">m</span>
+<span class="irc-fg55">m</span>
+<span class="irc-fg56">m</span>
+<span class="irc-fg57">h</span>
+<span class="irc-fg58">m</span>
+<span class="irc-fg59">m</span>
+<span class="irc-fg60">m</span>
+<span class="irc-fg61">m</span>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144480" class="msg" data-type="mode" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 14:59:42" class="time tooltipped tooltipped-e">14:59 </span>
+<span class="from">
+<span class="only-copy">***&nbsp;</span>
+</span>
+<span class="content">
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span> sets mode +v <span class="user color-16" data-name="krazytrain" role="button" dir="auto">krazytrain</span>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144481" class="msg" data-type="message" data-from="krazytrain">
+<span aria-hidden="true" aria-label="15 September 2026, 14:59:48" class="time tooltipped tooltipped-e">14:59 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-16" data-name="krazytrain" role="button">+krazytrain</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->oh </span>
+</div>
+<!---->
+<!---->
+<div id="msg-144482" class="msg previous-source" data-type="message" data-from="krazytrain">
+<span aria-hidden="true" aria-label="15 September 2026, 14:59:54" class="time tooltipped tooltipped-e">14:59 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-16" data-name="krazytrain" role="button">+krazytrain</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->i was wondering why irc was so quiet</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144522" class="msg" data-type="message" data-from="tulsa">
+<span aria-hidden="true" aria-label="15 September 2026, 15:14:15" class="time tooltipped tooltipped-e">15:14 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-10" data-name="tulsa" role="button">+tulsa</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->there was some turbulence</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144571" class="msg" data-type="join" data-from="anony">
+<span aria-hidden="true" aria-label="15 September 2026, 15:28:53" class="time tooltipped tooltipped-e">15:28 </span>
+<span class="from">
+<span class="only-copy">***&nbsp;</span>
+</span>
+<span class="content">
+<span class="user color-6" data-name="anony" role="button">anony</span>
+<i class="hostmask"> (anony@oontz-vet.rqu.4io9tq.IP)</i>
+<!---->
+<i class="realname"> (anony)</i> has joined the channel </span>
+</div>
+<!---->
+<!---->
+<div id="msg-144572" class="msg" data-type="mode" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 15:28:53" class="time tooltipped tooltipped-e">15:28 </span>
+<span class="from">
+<span class="only-copy">***&nbsp;</span>
+</span>
+<span class="content">
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span> sets mode +v <span class="user color-6" data-name="anony" role="button" dir="auto">anony</span>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-144937" class="msg self" data-type="message" data-from="z0mbi">
+<span aria-hidden="true" aria-label="15 September 2026, 16:33:41" class="time tooltipped tooltipped-e">16:33 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-3" data-name="z0mbi" role="button">!z0mbi</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->having multiple things in my house make the meshtastic message br br brrrrrr noise at once is funny</span>
+</div>
+<!---->
+<!---->
+<div id="msg-145393" class="msg" data-type="message" data-from="asoda">
+<span aria-hidden="true" aria-label="15 September 2026, 17:45:08" class="time tooltipped tooltipped-e">17:45 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-9" data-name="asoda" role="button">+asoda</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->!show widow's bay</span>
+</div>
+<!---->
+<!---->
+<div id="msg-145394" class="msg" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 17:45:09" class="time tooltipped tooltipped-e">17:45 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="irc-bold irc-fg46">Show </span>
+<span class="irc-bold irc-fg46 irc-underline">Widow's Bay (2026)</span> <span class="irc-fg73">Rating</span> <span class="irc-fg57">★★★★</span>☆ <span class="irc-fg73">Status</span> <span class="irc-fg44">Returning Series</span> <span class="irc-fg73">Genres</span> <span class="irc-fg53">(Drama, Comedy, Mystery)</span>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-145395" class="msg previous-source" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 17:45:09" class="time tooltipped tooltipped-e">17:45 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="irc-fg73">Summary</span> The mayor of a New England town resolves to turn it into the next tourist hot spot, despite local warnings that it's cursed.</span>
+</div>
+<!---->
+<!---->
+<div id="msg-145396" class="msg previous-source" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 17:45:09" class="time tooltipped tooltipped-e">17:45 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<a href="https://www.youtube.com/watch?v=VcpYPxKeGAc" dir="auto" target="_blank" rel="noopener">https://www.youtube.com/watch?v=VcpYPxKeGAc</a>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-145399" class="msg" data-type="message" data-from="asoda">
+<span aria-hidden="true" aria-label="15 September 2026, 17:45:31" class="time tooltipped tooltipped-e">17:45 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-9" data-name="asoda" role="button">+asoda</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->created by katie dippold ^ the babadook party lady</span>
+</div>
+<!---->
+<!---->
+<div id="msg-145625" class="msg" data-type="message" data-from="tangofoxtrot">
+<span aria-hidden="true" aria-label="15 September 2026, 18:13:40" class="time tooltipped tooltipped-e">18:13 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-16" data-name="tangofoxtrot" role="button">+tangofoxtrot</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->!ooontz</span>
+</div>
+<!---->
+<!---->
+<div id="msg-145626" class="msg" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 18:13:40" class="time tooltipped tooltipped-e">18:13 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="emoji" role="img" aria-label="Emoji: police car light" title="Emoji: police car light">
+<span class="irc-fg87">🚨</span>
+</span>
+<span class="irc-fg87">==</span>
+<span class="emoji" role="img" aria-label="Emoji: clinking beer mugs" title="Emoji: clinking beer mugs">
+<span class="irc-fg87">🍻</span>
+</span>
+<span class="irc-fg87">- _ -</span>
+<span class="emoji" role="img" aria-label="Emoji: bell" title="Emoji: bell">
+<span class="irc-fg87">🔔</span>
+</span>
+<span class="irc-fg87"> fweeeEEEEP  (__*__) ==</span>
+<span class="emoji" role="img" aria-label="Emoji: balloon" title="Emoji: balloon">
+<span class="irc-fg87">🎈</span>
+</span>
+<span class="emoji" role="img" aria-label="Emoji: party popper" title="Emoji: party popper">
+<span class="irc-fg87">🎉</span>
+</span>
+<span class="irc-fg87"> *does the stomp and shuffle* </span>
+<span class="emoji" role="img" aria-label="Emoji: party popper" title="Emoji: party popper">
+<span class="irc-fg87">🎉</span>
+</span>
+<span class="emoji" role="img" aria-label="Emoji: balloon" title="Emoji: balloon">
+<span class="irc-fg87">🎈</span>
+</span>
+<span class="irc-fg87">== (__*__)  ԀƎƎƎƎǝǝǝʍɟ </span>
+<span class="emoji" role="img" aria-label="Emoji: bell" title="Emoji: bell">
+<span class="irc-fg87">🔔</span>
+</span>
+<span class="irc-fg87">- _ -</span>
+<span class="emoji" role="img" aria-label="Emoji: clinking beer mugs" title="Emoji: clinking beer mugs">
+<span class="irc-fg87">🍻</span>
+</span>
+<span class="irc-fg87">==</span>
+<span class="emoji" role="img" aria-label="Emoji: police car light" title="Emoji: police car light">
+<span class="irc-fg87">🚨</span>
+</span>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-145791" class="msg" data-type="quit" data-from="asoda">
+<span aria-hidden="true" aria-label="15 September 2026, 18:56:15" class="time tooltipped tooltipped-e">18:56 </span>
+<span class="from">
+<span class="only-copy">***&nbsp;</span>
+</span>
+<span class="content">
+<span class="user color-9" data-name="asoda" role="button">+asoda</span>
+<i class="hostmask"> (textual@oontz-ruq.u8t.ngbkrg.IP)</i> has quit <i class="quit-reason">(Quit: My MacBook has gone to sleep. ZZZzzz…)</i>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-146273" class="msg" data-type="message" data-from="krazytrain">
+<span aria-hidden="true" aria-label="15 September 2026, 20:46:31" class="time tooltipped tooltipped-e">20:46 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-16" data-name="krazytrain" role="button">+krazytrain</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->!rr</span>
+</div>
+<!---->
+<!---->
+<div id="msg-146274" class="msg" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 20:46:31" class="time tooltipped tooltipped-e">20:46 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="irc-fg53">Pulling the trigger...</span>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-146275" class="msg previous-source" data-type="message" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 20:46:32" class="time tooltipped tooltipped-e">20:46 </span>
+<span class="from">
+<span class="only-copy" aria-hidden="true">&lt;</span>
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span>
+<span class="only-copy" aria-hidden="true">&gt;&nbsp;</span>
+</span>
+<span class="content" dir="auto">
+<!---->
+<!---->
+<span class="irc-fg44">Click! Your aim is terrible! </span>
+<span class="user color-10" data-name="tulsa" role="button" dir="auto">
+<span class="irc-fg44">tulsa</span>
+</span>
+<span class="irc-fg44"> gains half-ops!</span>
+</span>
+</div>
+<!---->
+<!---->
+<div id="msg-146277" class="msg" data-type="mode" data-from="ircb0t">
+<span aria-hidden="true" aria-label="15 September 2026, 20:46:33" class="time tooltipped tooltipped-e">20:46 </span>
+<span class="from">
+<span class="only-copy">***&nbsp;</span>
+</span>
+<span class="content">
+<span class="user color-5" data-name="ircb0t" role="button">!ircb0t</span> sets mode +h <span class="user color-10" data-name="tulsa" role="button" dir="auto">tulsa</span>
+</span>
+</div>
+<!---->
+</div><!-- .messages -->
+</div><!-- .chat -->
+</div><!-- .chat-content -->
+<form id="form" method="post" action="">
+<span id="upload-progressbar">
+</span>
+<span id="nick">z0mbi</span>
+<textarea id="input" dir="auto" class="mousetrap" enterkeyhint="send" placeholder="Write to #channel" aria-label="Write to #channel">
+</textarea>
+<span id="upload-tooltip" class="tooltipped tooltipped-w tooltipped-no-touch" aria-label="Upload file">
+<input id="upload-input" type="file" aria-labelledby="upload" multiple="">
+<button id="upload" type="button" aria-label="Upload file">
+</button>
+</span>
+<span id="submit-tooltip" class="tooltipped tooltipped-w tooltipped-no-touch" aria-label="Send message">
+<button id="submit" type="submit" aria-label="Send message">
+</button>
+</span>
+</form>
+</div>
+<!---->
+</div><!-- #chat -->
+</div><!-- #chat-container -->
+		<div id="image-viewer" class="">
+		<!---->
+		</div>
+		<!---->
+		<div id="confirm-dialog-overlay" class="">
+		<div id="confirm-dialog">
+		<div class="confirm-text">
+		<div class="confirm-text-title">
+		</div>
+		<p>
+		</p>
+		</div>
+		<div class="confirm-buttons">
+		<button class="btn btn-cancel">Cancel</button>
+		<button class="btn btn-danger">
+		</button>
+		</div>
+		</div>
+		</div>
+		<div id="upload-overlay">
+		</div>
+		</div>
+		</div>
+		
+		<!-- 4. bundle scripts
+		<script src="js/loading-error-handlers.js?v=702ab331bb"></script>
+		<script src="js/bundle.vendor.js?v=702ab331bb"></script>
+		<script src="js/bundle.js?v=702ab331bb"></script>
+		-->
+	
+
+<ul class="textcomplete-menu" style="display: none; position: absolute; z-index: 1000;">
+</ul>
+		
+<script src="harness.js"></script>
+<script>
+	// Regenerates only the data: userlist, message log, DM rows. The shell stays as captured.
+	(function () {
+		const usersInput = document.getElementById("harness-users");
+		const status = document.getElementById("harness-status");
+		const QUERIES_PER_NETWORK = 2;
+		let seed = 1;
+
+		/**
+		 * Rebuilds the userlist and the chat log from a set of users.
+		 * @param users - user records from Harness.parseUsers() or randomUsers()
+		 * @param random - generator from Harness.seededRandom
+		 */
+		function render(users, random) {
+			document.querySelector(".names").replaceChildren(...Harness.userGroups(users));
+
+			const count = document.querySelector(".count .search");
+
+			if (count) {
+				count.placeholder = users.length + " users";
+			}
+
+			const messages = [];
+			let minutes = 10 * 60 + 27;
+
+			for (let i = 0; i < 26; i++) {
+				const user = Harness.pick(users, random);
+				const text = Harness.lorem(random, 4 + Math.floor(random() * 14));
+				const stamp = String(Math.floor(minutes / 60)).padStart(2, "0") + ":" +
+					String(minutes % 60).padStart(2, "0");
+				messages.push(Harness.messageRow(user, text, stamp));
+				minutes += 1 + Math.floor(random() * 4);
+			}
+
+			document.querySelector(".messages").replaceChildren(...messages);
+
+			// Only [data-type=query] is a person; channel rows are left alone.
+			let item = 4;
+			let queries = 0;
+
+			for (const channels of document.querySelectorAll(".channels")) {
+				for (const stale of channels.querySelectorAll('[data-type="query"]')) {
+					stale.remove();
+				}
+
+				// Without replacement - nobody holds two DM tabs on one network.
+				const pool = users.slice();
+
+				for (let i = 0; i < QUERIES_PER_NETWORK && pool.length; i++) {
+					const [user] = pool.splice(Math.floor(random() * pool.length), 1);
+					channels.append(Harness.queryItem(user, item++));
+					queries++;
+				}
+			}
+
+			const modes = new Set(users.map((u) => u.mode));
+			status.textContent = users.length + " users, " + modes.size + " groups, " + queries + " DMs";
+		}
+
+		/** Renders whatever is in the textarea, falling back to a generated channel. */
+		function apply() {
+			const random = Harness.seededRandom(seed);
+			const typed = Harness.parseUsers(usersInput.value);
+			render(typed.length ? typed : Harness.randomUsers(20, random), random);
+		}
+
+		document.getElementById("harness-apply").addEventListener("click", apply);
+		document.getElementById("harness-random").addEventListener("click", () => {
+			seed = (seed + 1) >>> 0;
+			usersInput.value = "";
+			apply();
+		});
+		usersInput.addEventListener("keydown", (event) => {
+			if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+				apply();
+			}
+		});
+
+		apply();
+	})();
+</script>
+</body>
+</html>

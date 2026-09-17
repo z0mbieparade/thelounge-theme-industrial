@@ -1,7 +1,7 @@
 @use "sass:string";
 @use "sass:map";
-@use "sass:math";
 @use "sass:list";
+@use "palette" as *;
 // @import url('https://fonts.googleapis.com/css?family=Major+Mono+Display&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cutive+Mono&family=Kode+Mono:wght@400..700&family=Major+Mono+Display&family=Nova+Mono&family=Share+Tech+Mono&family=Syne+Mono&family=VT323&display=swap');
 
@@ -12,342 +12,7 @@
  * License: MIT
  */
 
-$irc: ( 0: 'white', 1: 'black', 2: 'navy', 3: 'green', 4: 'red', 5: 'brown', 6: 'purple',
-	7: 'orange', 8: 'yellow', 9: 'lime', 10: 'teal', 11: 'cyan', 12: 'blue', 13: 'fuchsia',
-	14: 'gray', 15: 'lightgray'
-);
-
-$chars: (
-	'a':'A','b':'B','c':'C','d':'D','e':'E','f':'F','g':'G','h':'H','i':'I','j':'J',
-	'k':'K','l':'L','m':'M','n':'N','o':'O','p':'P','q':'Q','r':'R','s':'S','t':'T',
-	'u':'U','v':'V','w':'W','x':'X','y':'Y','z':'Z'
-);
-
-$perceptual-hue-map: (
-	0,    // Red
-	15,   // Red-orange
-	35,   // Orange  
-	44,   // Yellow-orange
-	60,   // Yellow
-	75,   // Yellow-green
-	120,  // Green
-	180,  // Cyan
-	206,  // Blue-cyan
-	240,  // Blue
-	270,  // Blue-violet
-	300,  // Magenta
-	320,  // Red-magenta
-	360   // Red (full circle)
-);
-
-$base-hue-lightness: (
-	0: 55%,   // Red
-	15: 50%,  // Red-orange
-	35: 50%,  // Orange  
-	44: 50%,  // Yellow-orange
-	60: 40%,  // Yellow
-	75: 45%,  // Yellow-green
-	120: 45%, // Green
-	180: 45%, // Cyan
-	206: 55%, // Blue-cyan
-	240: 75%, // Blue
-	270: 65%, // Blue-violet
-	300: 50%, // Magenta
-	320: 55%, // Red-magenta
-	360: 55%  // Red (full circle)
-);
-
-$lighter: 15; //makes the darkest color lighter
-$darker: 0; //makes the lightest color darker
-
-// Function to interpolate between two values
-// $start: starting value
-// $end: ending value
-// $factor: interpolation factor (0 to 1), greater number = closer to $end
-@function lerp($start, $end, $factor) {
-	@return $start + ($end - $start) * $factor;
-}
-
-// Function to sort a map by its values (ascending order)
-// Returns a list of keys sorted by their corresponding values
-// $map: the map to sort
-@function sort-map-by-value($map) {
-	$sorted-keys: ();
-	$map-size: list.length(map.keys($map));
-
-	// Selection sort: find minimum value in each pass
-	@for $pass from 1 through $map-size {
-		$min-value: 999999;
-		$min-key: null;
-
-		@each $key, $value in $map {
-			// Skip keys already in sorted list
-			$already-used: false;
-			@each $used-key in $sorted-keys {
-				@if $used-key == $key {
-					$already-used: true;
-				}
-			}
-
-			// Find the minimum value among remaining keys
-			@if not $already-used and $value < $min-value {
-				$min-value: $value;
-				$min-key: $key;
-			}
-		}
-
-		// Add the minimum key to sorted list
-		@if $min-key != null {
-			$sorted-keys: append($sorted-keys, $min-key);
-		}
-	}
-
-	@return $sorted-keys;
-}
-
-// Fixed permutation map for shuffling (deterministic, not random)
-// This creates a consistent shuffle that remains the same across renders
-// Index 8 and 26 (letter Z) remain in place
-$shuffle-map: (
-	1: 17, 
-	2: 5, 
-	3: 22, 
-	4: 11, 
-	5: 29, 
-	6: 14,
-	7: 19, 
-	8: 8, //
-	9: 31,
-	10: 3, //
-	11: 27, 
-	12: 2, 
-	13: 20, 
-	14: 9, 
-	15: 25, 
-	16: 13, 
-	17: 6, 
-	18: 23, //
-	19: 15, 
-	20: 30, //
-	21: 21, 
-	22: 10, 
-	23: 18, 
-	24: 28, 
-	25: 1, 
-	26: 4, 
-	27: 16, 
-	28: 7, 
-	29: 24, 
-	30: 12,
-	31: 32, 
-	32: 26
-);
-$shuffle-letters: (
-	'A': 'Q', 
-	'B': 'W', 
-	'C': 'T', 
-	'D': 'R', 
-	'E': 'E', //
-	'F': 'Y', 
-	'G': 'U', 
-	'H': 'I',
-	'I': 'O', 
-	'J': 'P', 
-	'K': 'M', 
-	'L': 'C', 
-	'M': 'K', 
-	'N': 'F', 
-	'O': 'G', 
-	'P': 'H',
-	'Q': 'J', 
-	'R': 'D', 
-	'S': 'L', 
-	'T': 'A', 
-	'U': 'X', 
-	'V': 'S', 
-	'W': 'V', 
-	'X': 'B',
-	'Y': 'N', 
-	'Z': 'Z', //
-);
-
-// Function to shuffle an index using the fixed permutation map
-// $index: the original index (1-32)
-// Returns: the shuffled index
-@function shuffle-index($index) {
-	//if there's no mapping, return the original index
-	@if not map.has-key($shuffle-map, $index) {
-		@return $index;
-	}
-	@return map.get($shuffle-map, $index);
-}
-
-// Function to get perceptually uniform hue
-@function perceptual-hue($position) {
-	// Clamp position between 0 and 1
-	$pos: math.max(0, math.min(1, $position));
-
-	// Calculate which segment we're in
-	$map-length: list.length($perceptual-hue-map);
-	$segment-size: math.div(1, ($map-length - 1));
-	$segment-index: math.floor(math.div($pos, $segment-size));
-
-	// Handle edge case for position = 1
-	@if $segment-index >= $map-length - 1 {
-		@return list.nth($perceptual-hue-map, $map-length);
-	}
-
-	// Get the two hues to interpolate between
-	$lower-hue: list.nth($perceptual-hue-map, $segment-index + 1);
-	$upper-hue: list.nth($perceptual-hue-map, $segment-index + 2);
-
-	// Calculate interpolation factor within this segment
-	$segment-start: $segment-index * $segment-size;
-	$factor: math.div(($pos - $segment-start), $segment-size);
-
-	// Interpolate between the two hues
-	@return lerp($lower-hue, $upper-hue, $factor);
-}
-
-// Function to get base lightness for a given hue
-@function get-hue-lightness($hue) {
-  // Convert hue to 0-360 range
-  $normalized-hue: $hue % 360;
-  @if $normalized-hue < 0 {
-    $normalized-hue: $normalized-hue + 360;
-  }
-  
-  // Find the closest hue values in our lightness map
-  $lower-hue: 0;
-  $upper-hue: 360;
-  $lower-lightness: map.get($base-hue-lightness, 0);
-  $upper-lightness: map.get($base-hue-lightness, 360);
-  
-  // Find the surrounding hue values
-  @each $hue-key, $lightness-value in $base-hue-lightness {
-    @if $hue-key <= $normalized-hue {
-      $lower-hue: $hue-key;
-      $lower-lightness: $lightness-value;
-    }
-    @if $hue-key >= $normalized-hue and $upper-hue == 360 {
-      $upper-hue: $hue-key;
-      $upper-lightness: $lightness-value;
-    }
-  }
-  
-  // Handle edge case where we found exact match
-  @if $lower-hue == $upper-hue {
-    @return $lower-lightness;
-  }
-  
-  // Interpolate between the lightness values
-  $factor: math.div(($normalized-hue - $lower-hue), ($upper-hue - $lower-hue));
-  $interpolated-lightness: lerp(math.div($lower-lightness, 1%), math.div($upper-lightness, 1%), $factor);
-  
-  @return $interpolated-lightness * 1%;
-}
-
-// Generates a color based on index, optional alpha, and fractional interpolation
-// $num: current color index (0 to max)
-// $max: total number of distinct colors (default is 31)
-// $between: Number of fractional steps between adjacent colors (default is 0 - no interpolation)
-// $between-max: Maximum number of fractional steps (default is 27 - for letters a-z)
-// $a: alpha value (0-1) for transparency (default is 1 - fully opaque)
-@function c($num: 0, $max-num: 31, $between: 0, $max-between: 27, $a: 1, $return-data:false) {
-	
-	$num: $num % ($max-num + 1);
-	@if $num < 0 {
-		$num: $num + ($max-num + 1);
-	}
-	$between: $between % ($max-between + 1);
-	@if $between < 0 {
-		$between: $between + ($max-between + 1);
-	}
-
-	// Divide by ($max-num + 1) to ensure position never reaches 1.0
-	// This prevents wraparound where position 1.0 = position 0.0 (both red)
-	$position: math.div($num, $max-num + 1);
-	$h: perceptual-hue($position); // Perceptual hue based on position
-	$s: 100; // Full saturation by default (unitless)
-	$l: get-hue-lightness($h); // Get base lightness for this hue (unitless)
-
-	@if $num % 2 != 0 {
-		$l: $l + $lighter; // lighten odd numbers
-	} @else {
-		$l: $l - $darker; // darken even numbers
-	}
-
-	// If between interpolation is requested
-	@if ($between > 0 and $max-between > 0) {
-		// Convert between value to decimal (0-1 range)
-		$dec: math.div($between, $max-between);
-
-		// Calculate the next color's values
-		$next-num: ($num + 1) % $max-num; // Wrap around if needed
-
-		$next-color-data: c($num + 1, $max-num, 0, $max-between, $a, true);
-		$next-num: map.get($next-color-data, 'num');
-		$h-next: map.get($next-color-data, 'h');
-		$l-next: map.get($next-color-data, 'l');
-
-		// Apply the same odd/even lightness adjustment to the next color
-		@if $next-num % 2 != 0 {
-			$l-next: $l-next + $lighter;
-		} @else {
-			$l-next: $l-next - $darker;
-		}
-
-		// Calculate the distance between current and next color values
-		// Handle hue wrapping (e.g., from 320 to 0)
-		$h-dist: $h-next - $h;
-		@if $h-dist > 180 {
-			$h-dist: $h-dist - 360;
-		} @else if $h-dist < -180 {
-			$h-dist: $h-dist + 360;
-		}
-
-		$l-dist: $l-next - $l; // Lightness distance
-
-		// Calculate how much to shift current values toward next color
-		$h-frac: $h-dist * $dec; // Fractional hue shift
-		$l-frac: $l-dist * $dec; // Fractional lightness shift
-
-		// Adjust saturation based on letter position for even more color variety
-		@if $between % 3 == 0 {
-			$s: 70%; // Every 3rd letter: low saturation (more muted)
-		} @else if $between % 2 == 0 {
-			$s: 90%; // Every 2nd letter: medium saturation
-		}
-		// Otherwise keep 100% saturation (full vibrant color)
-
-		// Apply the fractional interpolation to hue and lightness
-		$h: $h + $h-frac;
-		$l: $l + $l-frac;
-	}
-
-	// round to 2 decimal places to avoid precision issues
-	$h: math.div(math.round($h * 100), 100);
-	$l: math.div(math.round($l * 100), 100);
-	$s: math.div(math.round($s * 100), 100);
-	$a: math.div(math.round($a * 100), 100);
-
-	@if $return-data {
-		@return (
-			'num': $num,
-			'h': $h,
-			's': $s,
-			'l': $l,
-			'a': $a,
-			'hsla': hsla($h, $s * 1%, $l, $a)
-		);
-	}
-
-	@return hsla($h, $s * 1%, $l, $a);
-}
-
-// Applies consistent text styling for the theme's distinctive typography
-// Converts text to lowercase, applies 'Major Mono Display' monospace font, and makes it bold
-// Used primarily for headings and network/lobby names to maintain theme aesthetic
+// Headings, lobby names, #nick, userlist labels.
 @mixin lower_mono()
 {
 	text-transform: lowercase;
@@ -355,39 +20,15 @@ $shuffle-letters: (
 	font-weight: bold;
 }
 
-$letter-colors: ();
-$color-colors: ();
+$letter-colors: letter-colors();
+$color-colors: color-colors();
 
 :root {
-	$letter: 0;
-	@each $lower, $upper in $chars {
-		$shuffled-upper: map.get($shuffle-letters, $upper);
-		$letter-color: c($letter + 14, list.length($chars) - 1, 0, 0, 1, true);
-		$letter-colors: map.merge($letter-colors, ($shuffled-upper: $letter-color)) !global;
-		--color-#{$upper}: #{map.get($letter-color, 'hsla')};
-		$letter: $letter + 1;
-	}
-
+	// Shuffled, so the base var matches the row it fronts. Nicks starting with punctuation get it.
 	@for $i from 1 through 32 {
-		$shuffled-i: shuffle-index($i);
-		$color-color: c($i + 6, 31, 0, 0, 1, true);
-		$color-colors: map.merge($color-colors, ($shuffled-i: $color-color)) !global;
-		--color-#{$i}: #{map.get($color-color, 'hsla')};
+		--color-#{$i}: #{map.get(map.get($color-colors, $i), 'hsla')};
 	}
 
-	$letter: 0;
-	@each $lower, $upper in $chars {
-		$letter-color: map.get($letter-colors, $upper); 
-		--color-shift-#{$upper}: #{map.get($letter-color, 'hsla')};
-		$letter: $letter + 1;
-	}
-
-	@for $i from 1 through 32 {
-		$color-color: map.get($color-colors, $i);
-		--color-shift-#{$i}: #{map.get($color-color, 'hsla')};
-	}
-
-	$letter: 0;
 	@each $lower, $upper in $chars {
 		$letter-color: map.get($letter-colors, $upper);
 		$h-letter: map.get($letter-color, 'h');
@@ -395,14 +36,15 @@ $color-colors: ();
 			$color-color: map.get($color-colors, $i);
 			$h-color: map.get($color-color, 'h');
 
-			$h: lerp($h-letter, $h-color, 0.7);
+			$h: ($h-letter + hue-delta($h-letter, $h-color) * 0.7) % 360;
 			$s: map.get($letter-color, 's');
-			$l: map.get($letter-color, 'l');
+			// Re-derived at the new hue; carrying the letter's lightness put blues at a yellow's.
+			$l-offset: map.get($letter-color, 'l') - get-hue-lightness($h-letter);
+			$l: get-hue-lightness($h) + $l-offset;
 			$a: map.get($letter-color, 'a');
 
-			--color-#{$i}#{$upper}: #{hsla($h, $s * 1%, $l, $a)};
+			--color-#{$i}#{$upper}: #{hsla(round2($h), round2($s) * 1%, round2($l), round2($a))};
 		}
-		$letter: $letter + 1;
 	}
 
 	--color-white: white;
@@ -439,8 +81,10 @@ $color-colors: ();
 	--upload-progressbar-color: var(--button-color);
 }
 
+// Size only - `display: none` here would hide the thumb rules below along with the bar.
 ::-webkit-scrollbar {
-	display: none;
+	width: 8px;
+	height: 8px;
 }
 
 /* Samsung Internet and Microsoft Edge (yes, both of them use -webkit- prefix) */
@@ -453,23 +97,22 @@ $color-colors: ();
 	opacity: 1; /* fix opacity in Firefox */
 }
 
+// Unqualified, so both axes match what `scrollbar-color` does below.
 ::-webkit-scrollbar-thumb
 {
-	&:vertical {
-		background: h(192, 100%, 25%);
+	background: hsl(192, 100%, 25%);
 
-		&:hover {
-			background: h(192, 100%, 30%);
-		}
+	&:hover {
+		background: hsl(192, 100%, 30%);
+	}
 
-		&:active {
-			background: h(192, 100%, 40%);
-		}
+	&:active {
+		background: hsl(192, 100%, 40%);
 	}
 }
 
 html {
-	scrollbar-color: h(192, 100%, 25%) h(192, 100%, 25%, 10%);
+	scrollbar-color: hsl(192, 100%, 25%) hsla(192, 100%, 25%, 0.1);
 	scrollbar-width: thin;
 }
 
@@ -728,7 +371,7 @@ code
 
 			&.not-connected,
 			&.not-connected.active,
-			&.not-connected .lobby-wrap:hover, {
+			&.not-connected .lobby-wrap:hover {
 				color: var(--color-red)
 			}
 		}
@@ -988,53 +631,6 @@ code
 	.irc-fg#{$i} { color: var(--color-#{$color}); }
 }
 
-// Controls nickname styling based on brightness/darkness of assigned color
-// Parameters:
-//   $dark: Whether to use bold font weight (for darker colors) or normal (for lighter colors)
-//   $color: Color index (not currently used in implementation)
-//   $upper: Whether the nickname starts with uppercase (not currently used in implementation)
-// Applies bold styling for dark colors to improve readability, hides :after pseudo-element for light colors
-@mixin dark_nick($dark:true, $color:1, $upper:false) {
-	@if $dark {
-		// For darker colors: use bold text to make it stand out and improve readability
-		font-weight: bold;
-	} @else {
-		// For lighter/brighter colors: use normal weight
-		font-weight: normal;
-		// Hide the :after pseudo-element for lighter colors (no visual indicator needed)
-		&:after {
-			display: none;
-		}
-	}
-}
-
-// Determines nickname text styling based on color index and first letter position
-// Parameters:
-//   $color: Color index (1-32) determining the base nickname color
-//   $letter: Alphabetical position (0-25) of nickname's first letter
-//   $upper: Whether the first letter is uppercase
-// Logic: For even-indexed colors, first 6 letters (a-f) are bold; for odd-indexed colors, last 6 letters (u-z) are bold
-// This creates visual variety in nickname styling based on their assigned color and first character
-@mixin extra_color($color:1, $letter:0, $upper:false)
-{
-	// Check if color index is even
-	@if $color % 2 == 0 {
-		// For even colors: make letters a-f (positions 0-5) bold
-		@if($letter < 6) {
-			@include dark_nick(true, $color, $upper); // Bold styling
-		} @else {
-			@include dark_nick(false); // Normal weight for g-z
-		}
-	} @else {
-		// For odd colors: make letters u-z (positions 21-25) bold
-		@if ($letter > 20) {
-			@include dark_nick(true, $color, $upper); // Bold styling
-		} @else {
-			@include dark_nick(false); // Normal weight for a-t
-		}
-	}
-}
-
 #chat.colored-nicks
 {
 	.from .user {
@@ -1107,74 +703,6 @@ code
 			line-height: 1rem;
 		}
 
-		&[data-name^='Bl'],
-		&[data-name^='bl'],
-		&[data-name^='Eu'],
-		&[data-name^='eu'],
-		&[data-name^='Pi'],
-		&[data-name^='pi'],
-		&[data-name^='kr'],
-		&[data-name^='Kr']
-		{
-			font-size: 1.1rem;
-			line-height: 1rem;
-			font-family: "Cutive Mono", monospace !important;
-		}
-
-		&[data-name^='oo'],
-		&[data-name^='Oo'],
-		&[data-name^='ew'],
-		&[data-name^='Ew']
-		{
-			font-size: 1rem;
-			line-height: 1rem;
-			font-family: "Kode Mono", monospace !important;
-		}
-
-		&[data-name^='ap'],
-		&[data-name^='Ap'],
-		&[data-name^='sk'],
-		&[data-name^='Sk'],
-		&[data-name^='wa'],
-		&[data-name^='Wa'],
-		&[data-name^='lu'],
-		&[data-name^='Lu']
-		{
-			font-size: 1rem;
-			line-height: 1rem;
-			font-family: "Nova Mono", monospace !important;
-		}
-
-		&[data-name^='An'],
-		&[data-name^='an'],
-		&[data-name^='Sp'],
-		&[data-name^='sp'],
-		&[data-name^='pl'],
-		&[data-name^='Pl']
-		{
-			font-size: 1rem;
-			line-height: 1rem;
-			font-family: "Share Tech Mono", monospace !important;
-		}
-
-		&[data-name^='z0']
-		{
-			font-size: 1rem;
-			line-height: 1rem;
-			font-family: "Syne Mono", monospace !important;
-		}
-
-		&[data-name^='ev'],
-		&[data-name^='Ev'],
-		&[data-name^='ma'],
-		&[data-name^='Ma'],
-		&[data-name^='euk'],
-		&[data-name^='Euk']
-		{
-			font-family: "VT323", monospace !important;
-			font-size: 1.3rem;
-			line-height: 1rem;
-		}
 	}
 
 	.user-mode .user
@@ -1184,25 +712,50 @@ code
 	
 
 	@for $i from 1 through 32 {
-		$letter: 0;
-
 		.user.color-#{$i} {
 			color: var(--color-#{$i});
 			position: relative;
-			// @include extra_color($i, $letter);
 
 			@each $lower, $upper in $chars {
 				&[data-name^='#{$lower}'], &[data-name^='#{$upper}'] {
 					color: var(--color-#{$i}#{$upper});
-					// @include extra_color($i, $letter, $upper);
 				}
-				$letter: $letter + 1;
+			}
+		}
+	}
+
+	// `.user.user` and last: matches the loop's specificity above and wins the tie. Do not simplify.
+	@each $prefixes, $declarations in $name-styles {
+		$selector: ();
+
+		@each $token in $prefixes {
+			// Trailing $ means ends-with; anything else is a prefix.
+			$operator: "^";
+			$text: $token;
+
+			@if string.slice($token, -1) == "$" {
+				$operator: "$";
+				$text: string.slice($token, 1, -2);
+			}
+
+			$selector: list.append($selector, string.unquote(".user.user[data-name#{$operator}='#{$text}']"), comma);
+		}
+
+		#{$selector} {
+			@each $property, $value in $declarations {
+				// Uninterpolated, or quoted font names lose their quotes.
+				@if $property == font-family {
+					// The `*` reset sets font-family !important, so this has to as well.
+					#{$property}: $value !important;
+				} @else {
+					#{$property}: $value;
+				}
 			}
 		}
 	}
 }
 
-@media (max-width: 479px) 
+@media (max-width: 479px)
 {
 	#chat 
 	{

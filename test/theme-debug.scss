@@ -1,0 +1,32 @@
+// Intermediate values the theme computes but never uses. Not shipped; built by `npm run build`.
+
+@use "sass:map";
+@use "../palette" as *;
+
+$letter-colors: letter-colors();
+$color-colors: color-colors();
+
+:root {
+	// Declaration order - which is why these do not match the column of the same letter.
+	@each $upper, $color in letter-colors($shuffled: false) {
+		--color-#{$upper}: #{map.get($color, 'hsla')};
+	}
+
+	// The same palettes after the shuffle - what the matrix actually reads.
+	@each $lower, $upper in $chars {
+		--color-shift-#{$upper}: #{map.get(map.get($letter-colors, $upper), 'hsla')};
+	}
+
+	@for $i from 1 through 32 {
+		--color-shift-#{$i}: #{map.get(map.get($color-colors, $i), 'hsla')};
+	}
+
+	// Published so test/nicks.html reads the real lists instead of keeping a copy that drifts.
+	$index: 1;
+	@each $prefixes, $declarations in $name-styles {
+		--name-style-#{$index}: "#{$prefixes}";
+		$index: $index + 1;
+	}
+
+	--irc-names: "#{map.values($irc)}";
+}

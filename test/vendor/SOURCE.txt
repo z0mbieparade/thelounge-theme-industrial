@@ -1,0 +1,34 @@
+TheLounge's own stylesheet, vendored so the test pages show the theme in the cascade it
+actually sits in: base CSS first, theme second. Not shipped - package.json `files` keeps
+test/ out of the npm tarball.
+
+  thelounge-4.5.2.css          package/public/assets/index-sODcR3vw.css
+  fa-solid-900-BUswJgRo.woff2  referenced by that file, relative path kept
+  fa-solid-900-DOXgCApm.woff   same
+
+Source      npm thelounge@4.5.2, MIT, github.com/thelounge/thelounge
+Published   2026-07-12 (65 days old at review, past the 30-day soak)
+Publisher   GitHub Actions OIDC with SLSA provenance; registry signatures verify
+Checked     no @import and no external hosts - the only url() references are the two
+            fonts above, so this file fetches nothing over the network
+
+Note        the test pages are not offline: theme.css opens with an @import of
+            fonts.googleapis.com for the seven display fonts the theme uses - six that
+            $name-styles picks between, plus Major Mono Display for lower_mono(), which
+            sets headings, the lobby/network names, #nick and the userlist group labels.
+            Read offline, all of that falls back to plain monospace with no warning.
+Reviewed    2026-09-16
+
+Vendored rather than added as a devDependency: we need one stylesheet, not a 3.7 MB
+package with 24 dependencies, and the upstream filename is content-hashed
+(index-<hash>.css), so a node_modules path would break on every release.
+
+To refresh, re-run the review above and then:
+
+  npm pack thelounge@<version>
+  tar xzf thelounge-<version>.tgz
+  cp package/public/assets/index-*.css test/vendor/thelounge-<version>.css
+  cp package/public/assets/fa-solid-*.woff* test/vendor/
+
+Then update the <link> in test/sample-channel.html and test/nicks.html, and delete the
+old css. Check the fonts' hashed names too - they change independently.

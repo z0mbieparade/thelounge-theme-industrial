@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<!--
+  Visual harness for the nickname rules in theme.scss. Open it in a browser after
+  `npm run build` and compare against the client.
+
+  The nick styling is a 32x26 matrix (color class x first letter, `$chars` loop in theme.scss)
+  with name-prefix rules layered on top ($name-styles in _palette.scss), so nothing here is
+  assertable without looking at it. The markup mirrors what TheLounge emits - the theme
+  only matches inside `#chat.colored-nicks`, so the wrapper below is load-bearing.
+-->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Industrial - nick rules</title>
+	<link rel="stylesheet" href="vendor/thelounge-4.5.2.css" id="base-css" disabled>
+	<link rel="stylesheet" href="../theme.css">
+	<link rel="stylesheet" href="theme-debug.css">
+	<style>
+		html, body {
+			background: #000;
+			margin: 0;
+			padding: 24px;
+		}
+
+		.harness-title {
+			color: #fff;
+			font-size: 18px;
+			margin: 0 0 4px;
+		}
+
+		.harness-note {
+			color: #888;
+			font-size: 12px;
+			margin: 0 0 24px;
+			line-height: 1.6;
+		}
+
+		.harness-section {
+			border-top: 1px solid #333;
+			margin-top: 32px;
+			padding-top: 12px;
+		}
+
+		.harness-section h2 {
+			color: #fff;
+			font-size: 14px;
+			margin: 0 0 2px;
+		}
+
+		.harness-source {
+			color: #666;
+			font-size: 11px;
+			margin: 0 0 12px;
+		}
+
+		.harness-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+			gap: 10px 16px;
+		}
+
+		.harness-cell {
+			min-width: 0;
+		}
+
+		.harness-caption {
+			color: #666;
+			font-size: 10px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.harness-controls {
+			color: #888;
+			font-size: 12px;
+			display: flex;
+			gap: 16px;
+			align-items: center;
+			flex-wrap: wrap;
+		}
+
+		.harness-actual {
+			outline: 1px solid #666;
+			outline-offset: 3px;
+		}
+
+		.harness-frame {
+			width: 100%;
+			height: 520px;
+			border: 1px solid #333;
+			background: #000;
+		}
+
+		.harness-matrix {
+			display: grid;
+			gap: 1px;
+			width: max-content;
+			max-width: 100%;
+			overflow-x: auto;
+		}
+
+		.harness-swatch {
+			width: 26px;
+			height: 22px;
+			font-size: 10px;
+			line-height: 22px;
+			text-align: center;
+			background: #000;
+		}
+
+		.harness-axis {
+			outline: 1px solid #444;
+		}
+
+		.harness-tables {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+			gap: 24px;
+			color: #999;
+			font-size: 11px;
+		}
+
+		.harness-tables table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		.harness-tables th {
+			text-align: left;
+			color: #ccc;
+			border-bottom: 1px solid #444;
+		}
+
+		.harness-tables td {
+			padding: 1px 6px 1px 0;
+			white-space: nowrap;
+		}
+
+		.harness-controls input,
+		.harness-controls select,
+		.harness-controls button {
+			background: #111;
+			color: #eee;
+			border: 1px solid #444;
+			padding: 4px 8px;
+			font-size: 12px;
+		}
+
+		/* Deliberately no `.user:after { content }` shim here. The client puts the angle
+		   brackets in `.only-copy` spans (test/sample-channel.html), so faking content on the
+		   pseudo-element would show a separator the client does not have. */
+	</style>
+</head>
+<body>
+	<h1 class="harness-title">Industrial - nick rules</h1>
+	<p class="harness-note">
+		<label><input type="checkbox" id="base-css-toggle"> load TheLounge's own stylesheet
+		(<code>vendor/thelounge-4.5.2.css</code>) under the theme - faithful cascade, but it brings
+		the client's layout with it</label>
+	</p>
+	<p class="harness-note">
+		Every nick below is a real <code>.user</code> span inside <code>#chat.colored-nicks</code>, so
+		the theme applies exactly as it does in the client. The caption under each one is the color
+		class and <code>data-name</code> the rules matched on.<br>
+		Markup follows <a href="sample-channel.html">sample-channel.html</a>, captured from the
+		client - including that the mode sigil goes in the visible text while
+		<code>data-name</code> stays clean, which is what every prefix rule matches.
+	</p>
+
+	<div class="harness-section">
+		<h2>Palette matrix - every --color-&lt;class&gt;&lt;letter&gt;</h2>
+		<p class="harness-source">
+			the matrix loop in theme.scss. Rows are the 32 color classes, columns the 26 first letters; each
+			cell is the color a nick actually gets. The axis headers are the two source palettes,
+			<code>--color-1..32</code> (theme.scss) and <code>--color-A..Z</code> (test/theme-debug.scss).<br>
+			Hue lerps 70% from the letter toward the class, and saturation and alpha come from the
+			letter; lightness is re-derived at the shifted hue, then offset by however far the
+			letter sat from its own baseline - so a column varies in lightness rather than being
+			flat.
+			The axis headers won't match their own row or column: the matrix looks the letter up
+			through <code>$shuffle-letters</code> / <code>shuffle-index</code> in _palette.scss.
+		</p>
+		<div class="harness-controls">
+			<label>view
+				<select id="palette-view">
+					<option value="swatch">swatch</option>
+					<option value="text">text on black</option>
+					<option value="lightness">lightness only</option>
+				</select>
+			</label>
+			<span id="palette-readout">hover a cell</span>
+		</div>
+		<div id="palette-matrix"></div>
+	</div>
+
+	<div class="harness-section">
+		<h2>Source palettes, numerically</h2>
+		<p class="harness-source">The <code>:root</code> palette loops in theme.scss and test/theme-debug.scss, plus the 16 IRC names from <code>$irc</code> in _palette.scss</p>
+		<div id="palette-tables"></div>
+	</div>
+
+	<div id="chat" class="colored-nicks">
+		<div class="harness-section">
+			<h2>Look up one nick across all 32 color classes</h2>
+			<p class="harness-source">
+				TheLounge sums the nick's char codes mod 32, so exactly one of these is what the client
+				shows - it is outlined below. The other 31 are here to compare against, since the sum
+				is case-insensitive for ASCII but the prefix rules are not.
+			</p>
+			<div class="harness-controls">
+				<label>nick <input id="lookup-input" type="text" value="SegFaultB" size="20"></label>
+				<span id="lookup-actual"></span>
+			</div>
+			<div class="harness-grid" id="lookup-grid"></div>
+		</div>
+
+		<div class="harness-section">
+			<h2>Every color class</h2>
+			<p class="harness-source">the per-color font rules and the color loop in theme.scss</p>
+			<div class="harness-controls">
+				<label>first letter
+					<select id="color-letter"></select>
+				</label>
+				<button id="reshuffle" type="button">new nicks</button>
+			</div>
+			<div class="harness-grid" id="color-grid"></div>
+		</div>
+
+		<div class="harness-section">
+			<h2>Every first letter, one color class</h2>
+			<p class="harness-source">the per-letter rules in theme.scss - each first letter shifts the hue of its color class</p>
+			<div class="harness-controls">
+				<label>color class
+					<select id="letter-color"></select>
+				</label>
+			</div>
+			<div class="harness-grid" id="letter-grid"></div>
+		</div>
+
+		<div class="harness-section">
+			<h2>Name-prefix rules</h2>
+			<p class="harness-source">
+				<code>$name-styles</code> in _palette.scss, emitted after the color loop in theme.scss. These match
+				on the name alone and are written to beat the color loop, so where both set the same
+				property the name rule wins - shown at three color classes so you can confirm it is
+				consistent across them. Add a case by adding a line to that map.
+			</p>
+			<div class="harness-grid" id="prefix-grid"></div>
+		</div>
+
+		<div class="harness-section">
+			<h2>Sample channel</h2>
+			<p class="harness-source">
+				<a href="sample-channel.html">sample-channel.html</a>, captured from a running client,
+				in its own frame - so it brings its own copy of TheLounge's stylesheet and the full
+				shell, and the checkbox at the top does not affect it. Open it directly for a
+				full-width view.
+			</p>
+			<iframe id="channel" class="harness-frame" src="sample-channel.html" title="Sample channel from the client"></iframe>
+		</div>
+	</div>
+
+	<script src="harness.js"></script>
+	<script>
+		const COLOR_CLASSES = 32;
+		const LETTERS = "abcdefghijklmnopqrstuvwxyz";
+
+		// Reads a list published by test/theme-debug.scss, so the page keeps no copy of a Sass map.
+		function readList(name, separator) {
+			const raw = getComputedStyle(document.documentElement).getPropertyValue("--" + name).trim();
+			return raw.replace(/^"|"$/g, "").split(separator).map((s) => s.trim()).filter(Boolean);
+		}
+
+		// $irc, which backs .irc-fg*/.irc-bg* and the named colors the theme uses directly.
+		const IRC_NAMES = readList("irc-names", ",");
+
+		// One entry per $name-styles group, in map order. Reading until a property is missing
+		// means adding a group to the map needs no change here. The bound is a guard against a
+		// malformed sheet, not a real limit - $name-styles has 11 entries.
+		const MAX_NAME_STYLES = 200;
+		const PREFIX_RULES = [];
+
+		for (let i = 1; i <= MAX_NAME_STYLES; i++) {
+			const prefixes = readList("name-style-" + i, " ");
+
+			if (!prefixes.length) {
+				break;
+			}
+
+			PREFIX_RULES.push({group: i, prefixes: prefixes});
+		}
+
+		// Both lists come from theme-debug.css. If it was never built the page still renders,
+		// but silently omits every name rule and the IRC palette - say so rather than letting
+		// someone read an empty section as "the theme has no name rules".
+		if (!PREFIX_RULES.length || !IRC_NAMES.length) {
+			const warning = document.createElement("p");
+			warning.className = "harness-note";
+			warning.style.color = "#e06";
+			warning.textContent =
+				"test/theme-debug.css has not been built, so the name-prefix and IRC sections are " +
+				"empty. Run: npm run build";
+			document.body.prepend(warning);
+		}
+
+		// Reads a --color-* off :root and splits out its hsl components.
+		function readColor(name) {
+			const property = "--color-" + name;
+			const css = getComputedStyle(document.documentElement).getPropertyValue(property).trim();
+			const parts = css.match(/-?[\d.]+/g);
+			const parsed = {property: property, css: css, h: null, s: null, l: null, a: 1};
+
+			if (!css.startsWith("hsl") || !parts || parts.length < 3) {
+				return parsed;
+			}
+
+			parsed.h = Number(parts[0]);
+			parsed.s = Number(parts[1]);
+			parsed.l = Number(parts[2]);
+			parsed.a = parts.length > 3 ? Number(parts[3]) : 1;
+			return parsed;
+		}
+
+		function swatch(color, label, view) {
+			const cell = document.createElement("div");
+			cell.className = "harness-swatch";
+			cell.title = color.property + " = " + color.css;
+
+			if (view === "text") {
+				cell.style.color = color.css;
+				cell.textContent = label;
+			} else if (view === "lightness" && color.l !== null) {
+				cell.style.background = "hsl(0, 0%, " + color.l + "%)";
+			} else {
+				cell.style.background = color.css;
+			}
+
+			cell.addEventListener("mouseenter", () => {
+				document.getElementById("palette-readout").textContent = cell.title;
+			});
+
+			return cell;
+		}
+
+		// The 32x26 matrix, with both source palettes on its axes.
+		function renderPalette(view) {
+			const grid = document.createElement("div");
+			grid.className = "harness-matrix";
+			grid.style.gridTemplateColumns = "repeat(" + (LETTERS.length + 1) + ", 26px)";
+
+			const corner = document.createElement("div");
+			corner.className = "harness-swatch";
+			grid.append(corner);
+
+			for (const letter of LETTERS) {
+				const upper = letter.toUpperCase();
+				const cell = swatch(readColor(upper), upper, view);
+				cell.classList.add("harness-axis");
+				grid.append(cell);
+			}
+
+			for (let color = 1; color <= COLOR_CLASSES; color++) {
+				const head = swatch(readColor(String(color)), String(color), view);
+				head.classList.add("harness-axis");
+				grid.append(head);
+
+				for (const letter of LETTERS) {
+					const upper = letter.toUpperCase();
+					grid.append(swatch(readColor(color + upper), upper, view));
+				}
+			}
+
+			document.getElementById("palette-matrix").replaceChildren(grid);
+		}
+
+		function paletteTable(heading, names) {
+			const table = document.createElement("table");
+			const head = document.createElement("tr");
+
+			for (const text of [heading, "H", "S", "L"]) {
+				const th = document.createElement("th");
+				th.textContent = text;
+				head.append(th);
+			}
+
+			table.append(head);
+
+			for (const name of names) {
+				const color = readColor(name);
+				const row = document.createElement("tr");
+				const cells = [
+					color.property,
+					color.h === null ? color.css : color.h,
+					color.s === null ? "" : color.s + "%",
+					color.l === null ? "" : color.l + "%",
+				];
+
+				for (const value of cells) {
+					const td = document.createElement("td");
+					td.textContent = String(value);
+					row.append(td);
+				}
+
+				const marker = document.createElement("td");
+				marker.textContent = "■";
+				marker.style.color = color.css;
+				row.append(marker);
+				table.append(row);
+			}
+
+			return table;
+		}
+
+		/** Renders the three source palettes as numeric tables. */
+		function renderPaletteTables() {
+			const wrap = document.createElement("div");
+			wrap.className = "harness-tables";
+			wrap.append(
+				paletteTable("letter", LETTERS.toUpperCase().split("")),
+				paletteTable("class", Array.from({length: COLOR_CLASSES}, (_, i) => String(i + 1))),
+				paletteTable("irc name", IRC_NAMES),
+			);
+
+			document.getElementById("palette-tables").replaceChildren(wrap);
+		}
+
+		function nickCell(name, classNumber, caption) {
+			const cell = document.createElement("div");
+			cell.className = "harness-cell";
+
+			const user = Harness.userSpan({nick: name, sigil: "", color: classNumber});
+
+			const label = document.createElement("div");
+			label.className = "harness-caption";
+			label.textContent = caption || "color-" + classNumber;
+
+			cell.append(user, label);
+			return cell;
+		}
+
+		function fillGrid(id, cells) {
+			const grid = document.getElementById(id);
+			grid.replaceChildren(...cells);
+		}
+
+		// The typed nick under every color class; the one the client would pick is outlined.
+		function renderLookup(name) {
+			const nick = name || "nick";
+			const actual = Harness.colorClass(nick);
+			const cells = [];
+
+			for (let color = 1; color <= COLOR_CLASSES; color++) {
+				const cell = nickCell(nick, color, color === actual ? "color-" + color + "  <- actual" : undefined);
+
+				if (color === actual) {
+					cell.classList.add("harness-actual");
+				}
+
+				cells.push(cell);
+			}
+
+			fillGrid("lookup-grid", cells);
+			// Only [data-name^=a..z] variants are generated, so a nick starting with anything
+			// else - _bot, [svc], 0x42 - keeps the bare --color-N and none of the letter rules.
+			const first = nick[0].toUpperCase();
+			const variant = /[A-Z]/.test(first) ? `--color-${actual}${first}` : `--color-${actual}`;
+			document.getElementById("lookup-actual").textContent =
+				`${nick} hashes to color-${actual}, so it takes ${variant}` +
+				(/[A-Z]/.test(first) ? "" : " - no letter variant matches a nick starting with " + nick[0]);
+		}
+
+		// One nick per color class, all sharing a first letter.
+		function renderColors(letter, seed) {
+			const random = Harness.seededRandom(seed);
+			const cells = [];
+
+			for (let color = 1; color <= COLOR_CLASSES; color++) {
+				cells.push(nickCell(Harness.makeNick(letter, random), color));
+			}
+
+			fillGrid("color-grid", cells);
+		}
+
+		// One nick per first letter at a fixed color class, in both cases.
+		function renderLetters(colorClass, seed) {
+			const random = Harness.seededRandom(seed);
+			const cells = [];
+
+			for (const letter of LETTERS) {
+				for (const prefix of [letter, letter.toUpperCase()]) {
+					const name = Harness.makeNick(prefix, random);
+					cells.push(nickCell(name, colorClass, prefix + " - " + name));
+				}
+			}
+
+			fillGrid("letter-grid", cells);
+		}
+
+		// Every name-prefix rule, each at three color classes - a rule that loses shows as a mismatch.
+		function renderPrefixes(seed) {
+			const random = Harness.seededRandom(seed);
+			const cells = [];
+
+			for (const rule of PREFIX_RULES) {
+				const heading = document.createElement("div");
+				heading.className = "harness-caption";
+				heading.style.gridColumn = "1 / -1";
+				heading.style.color = "#aaa";
+				heading.style.marginTop = "8px";
+				heading.textContent = "$name-styles group " + rule.group + " - " + rule.prefixes.join(" ");
+				cells.push(heading);
+
+				for (const prefix of rule.prefixes) {
+					const name = Harness.makeNickFor(prefix, random);
+
+					for (const color of [1, 2, 17]) {
+						cells.push(nickCell(name, color, prefix + " / color-" + color));
+					}
+				}
+			}
+
+			fillGrid("prefix-grid", cells);
+		}
+
+		function fillSelect(id, values, selected) {
+			const select = document.getElementById(id);
+
+			for (const value of values) {
+				const option = document.createElement("option");
+				option.value = String(value);
+				option.textContent = String(value);
+				option.selected = String(value) === String(selected);
+				select.append(option);
+			}
+		}
+
+		const paletteView = document.getElementById("palette-view");
+		const colorLetter = document.getElementById("color-letter");
+		const letterColor = document.getElementById("letter-color");
+		const lookupInput = document.getElementById("lookup-input");
+		let seed = 1;
+
+		// Re-renders every seeded section.
+		function renderAll() {
+			renderColors(colorLetter.value, seed);
+			renderLetters(Number(letterColor.value), seed);
+			renderPrefixes(seed);
+		}
+
+		fillSelect("color-letter", LETTERS.split(""), "s");
+		fillSelect("letter-color", Array.from({length: COLOR_CLASSES}, (_, i) => i + 1), 1);
+
+		document.getElementById("base-css-toggle").addEventListener("change", (event) => {
+			document.getElementById("base-css").disabled = !event.target.checked;
+		});
+
+		paletteView.addEventListener("change", () => renderPalette(paletteView.value));
+		colorLetter.addEventListener("change", renderAll);
+		letterColor.addEventListener("change", renderAll);
+		lookupInput.addEventListener("input", () => renderLookup(lookupInput.value));
+		document.getElementById("reshuffle").addEventListener("click", () => {
+			seed = (seed + 1) >>> 0;
+			renderAll();
+		});
+
+		renderPalette(paletteView.value);
+		renderPaletteTables();
+		renderLookup(lookupInput.value);
+		renderAll();
+	</script>
+</body>
+</html>

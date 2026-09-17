@@ -4,6 +4,20 @@
 	"description": "A dark 16-color monospaced theme for thelounge",
 	"main": "package.json",
 	"license": "MIT",
+	"files": [
+		"theme.css",
+		"theme.scss",
+		"_palette.scss",
+		"assets"
+	],
+	"scripts": {
+		"build": "sass --no-source-map theme.scss theme.css && npm run build:debug",
+		"build:debug": "sass --no-source-map test/theme-debug.scss test/theme-debug.css",
+		"watch": "sass --no-source-map --watch theme.scss:theme.css test/theme-debug.scss:test/theme-debug.css"
+	},
+	"devDependencies": {
+		"sass": "1.102.0"
+	},
 	"homepage": "https://github.com/z0mbieparade/thelounge-theme-industrial",
 	"thelounge": {
 		"name": "Industrial",
